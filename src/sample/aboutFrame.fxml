@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.AboutFrameController">
+  <children>
+    <Pane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <Label layoutX="89.0" layoutY="7.0" prefHeight="63.0" prefWidth="223.0" text="Санкт-Петербургский государственный технологический институт (технический университет)" textAlignment="CENTER" wrapText="true">
+          <font>
+            <Font name="System Bold" size="12.0" />
+          </font>
+        </Label>
+        <Label layoutX="14.0" layoutY="70.0" prefHeight="61.0" prefWidth="372.0" text="Программный комплекс для управления цветом полимерных пленочных материалов при подборе рецептуры окрашивания" textAlignment="CENTER" wrapText="true" />
+        <ImageView fitHeight="73.22387829329335" fitWidth="53.326087951660156" layoutX="332.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../resources/institute.png" />
+               </image>
+        </ImageView>
+        <Button fx:id="closeButton" layoutX="173.0" layoutY="165.0" mnemonicParsing="false" onAction="#CloseButtonAction" text="Закрыть" />
+        <Label layoutX="27.0" layoutY="131.0" prefWidth="201.0" text="Разработчик: Нефтанов Д.А." />
+      </children>
+    </Pane>
+  </children>
+</AnchorPane>
