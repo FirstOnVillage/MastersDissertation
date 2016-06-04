@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
+
 <AnchorPane prefHeight="480.0" prefWidth="718.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.MainFrameController">
   <children>
     <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -78,7 +82,7 @@
                            <children>
                               <TabPane layoutX="241.0" layoutY="67.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <tabs>
-                                  <Tab text="Таблица 1">
+                                  <Tab text="Обучающие партии">
                                     <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
@@ -86,12 +90,19 @@
                                                    <bottom>
                                                       <TitledPane animated="false" collapsible="false" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="90.0" text="Изменить строки" BorderPane.alignment="CENTER">
                                                         <content>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <TextField fx:id="batchIdTextField" layoutX="41.0" layoutY="20.0" prefWidth="70.0" promptText="№" />
+                                                                  <TextField fx:id="batchNameTextField" layoutX="137.0" layoutY="20.0" prefWidth="180.0" promptText="Имя" />
+                                                                  <Button layoutX="433.0" layoutY="20.0" mnemonicParsing="false" onAction="#addBatchTableItemButtonAction" text="Добавить" />
+                                                                  <Button layoutX="539.0" layoutY="20.0" mnemonicParsing="false" onAction="#updateBatchTableItemButtonAction" text="Изменить" />
+                                                                  <Button layoutX="642.0" layoutY="20.0" mnemonicParsing="false" onAction="#deleteBatchTableItemButtonAction" text="Удалить" />
+                                                               </children></AnchorPane>
                                                         </content>
                                                       </TitledPane>
                                                    </bottom>
                                                    <top>
-                                                      <TableView fx:id="batchTable" minHeight="-Infinity" prefHeight="315.0">
+                                                      <TableView fx:id="batchTable" minHeight="-Infinity" prefHeight="300.0">
                                                         <columns>
                                                           <TableColumn fx:id="colBatchID" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="№" />
                                                           <TableColumn fx:id="colBatchName" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" text="Имя" />
@@ -107,9 +118,49 @@
                                           </AnchorPane>
                                     </content>
                                   </Tab>
-                                  <Tab text="Таблица 2">
+                                  <Tab text="Данные обучающих партий">
                                     <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                             <children>
+                                                <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <bottom>
+                                                      <TitledPane animated="false" collapsible="false" maxHeight="-Infinity" minHeight="-Infinity" text="Изменить строки" BorderPane.alignment="CENTER">
+                                                         <content>
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <TextField layoutX="14.0" layoutY="39.0" prefHeight="25.0" prefWidth="102.0" promptText="Партия" />
+                                                                  <TextField layoutX="122.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="1 краситель" />
+                                                                  <Button layoutX="634.0" layoutY="8.0" mnemonicParsing="false" text="Добавить" />
+                                                                  <Button layoutX="634.0" layoutY="39.0" mnemonicParsing="false" text="Изменить" />
+                                                                  <Button layoutX="639.0" layoutY="71.0" mnemonicParsing="false" text="Удалить" />
+                                                                  <TextField layoutX="212.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="2 краситель" />
+                                                                  <TextField layoutX="302.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="3 краситель" />
+                                                                  <TextField layoutX="392.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="L" />
+                                                                  <TextField layoutX="473.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="a" />
+                                                                  <TextField layoutX="553.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="b" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </content>
+                                                      </TitledPane>
+                                                   </bottom>
+                                                   <top>
+                                                      <TableView fx:id="dtsTable" minHeight="-Infinity" prefHeight="260.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+                                                         <columns>
+                                                            <TableColumn fx:id="colDtsBatch" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" text="Партия" />
+                                                            <TableColumn fx:id="colDtsFirstDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 1 красит." />
+                                                            <TableColumn fx:id="colDtsSecondDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 2 красит." />
+                                                            <TableColumn fx:id="colDtsThirdDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 3 красит." />
+                                                            <TableColumn fx:id="colDtsLValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. L" />
+                                                            <TableColumn fx:id="colDtsAValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. a" />
+                                                            <TableColumn fx:id="colDtsBValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. b" />
+                                                         </columns>
+                                                         <BorderPane.margin>
+                                                            <Insets bottom="5.0" top="5.0" />
+                                                         </BorderPane.margin>
+                                                      </TableView>
+                                                   </top>
+                                                </BorderPane>
+                                             </children></AnchorPane>
                                     </content>
                                   </Tab>
                                     <Tab text="Таблица 3">
