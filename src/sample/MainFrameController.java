@@ -1,14 +1,13 @@
 package sample;
 
-import com.mysql.jdbc.MySQLConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
@@ -29,14 +28,30 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.TrainingSetScore;
 import org.encog.neural.networks.training.anneal.NeuralSimulatedAnnealing;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import tableModel.batchTableModel;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.net.URL;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ResourceBundle;
 
-public class MainFrameController {
+public class MainFrameController implements Initializable
+{
     BasicNetwork network;
 
+    @FXML
+    TableView<batchTableModel> batchTable;
+    @FXML
+    TableColumn colBatchID = new TableColumn();
+    @FXML
+    TableColumn colBatchName = new TableColumn();
+    @FXML
+    TableColumn colBatchUser = new TableColumn();
     @FXML
     private TextArea logTextArea;
     @FXML
@@ -68,7 +83,7 @@ public class MainFrameController {
         try
         {
             Stage aboutStage = new Stage();
-            Parent root = FXMLLoader.load(getClass().getResource("aboutFrame.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("../fxmlFrames/aboutFrame.fxml"));
             aboutStage.setTitle("О программе");
             aboutStage.getIcons().add(new Image("file:resources/about.png"));
             aboutStage.setResizable(false);
@@ -165,4 +180,37 @@ public class MainFrameController {
     }
 
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources)
+    {
+        colBatchID.setCellValueFactory(new PropertyValueFactory<batchTableModel, Integer>("batchIdCol"));
+        colBatchName.setCellValueFactory(new PropertyValueFactory<batchTableModel, String>("batchNameCol"));
+        colBatchUser.setCellValueFactory(new PropertyValueFactory<batchTableModel, String>("addByUserBatchCol"));
+
+        batchTable.getItems().setAll(getBatchTableInfo());
+    }
+
+    public List<batchTableModel> getBatchTableInfo()
+    {
+        List list = new LinkedList();
+        Statement st;
+        ResultSet rs;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = ("Select * from batch");
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                Integer id = rs.getInt("idBatch");
+                String name = rs.getString("name");
+                String user = rs.getString("changedByUser");
+                list.add(new batchTableModel(id, name, user));
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return list;
+    }
 }

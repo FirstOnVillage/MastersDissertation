@@ -22,7 +22,7 @@ public class Main extends Application {
         try
         {
             Stage passwordStage = new Stage();
-            Parent root = FXMLLoader.load(getClass().getResource("passwordFrame.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("../fxmlFrames/passwordFrame.fxml"));
             passwordStage.setTitle("Аутентификация ");
             passwordStage.getIcons().add(new Image("file:resources/admin.png"));
             passwordStage.setResizable(false);
@@ -38,7 +38,7 @@ public class Main extends Application {
                     {
                         Parent root = null;
                         try {
-                            root = FXMLLoader.load(getClass().getResource("mainFrame.fxml"));
+                            root = FXMLLoader.load(getClass().getResource("../fxmlFrames/mainFrame.fxml"));
                         } catch (IOException ex)
                         {
                             JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
