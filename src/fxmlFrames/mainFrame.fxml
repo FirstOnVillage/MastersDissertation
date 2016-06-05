@@ -128,16 +128,16 @@
                                                          <content>
                                                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                <children>
-                                                                  <TextField layoutX="14.0" layoutY="39.0" prefHeight="25.0" prefWidth="102.0" promptText="Партия" />
-                                                                  <TextField layoutX="122.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="1 краситель" />
-                                                                  <Button layoutX="634.0" layoutY="8.0" mnemonicParsing="false" text="Добавить" />
-                                                                  <Button layoutX="634.0" layoutY="39.0" mnemonicParsing="false" text="Изменить" />
-                                                                  <Button layoutX="639.0" layoutY="71.0" mnemonicParsing="false" text="Удалить" />
-                                                                  <TextField layoutX="212.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="2 краситель" />
-                                                                  <TextField layoutX="302.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="3 краситель" />
-                                                                  <TextField layoutX="392.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="L" />
-                                                                  <TextField layoutX="473.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="a" />
-                                                                  <TextField layoutX="553.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="b" />
+                                                                  <TextField fx:id="firstDyeValueTextField" layoutX="122.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="1 краситель" />
+                                                                  <Button layoutX="634.0" layoutY="8.0" mnemonicParsing="false" onAction="#addDtsTableItemButtonAction" text="Добавить" />
+                                                                  <Button layoutX="634.0" layoutY="39.0" mnemonicParsing="false" onAction="#updateDtsTableItemButtonAction" text="Изменить" />
+                                                                  <Button layoutX="639.0" layoutY="71.0" mnemonicParsing="false" onAction="#deleteDtsTableItemButtonAction" text="Удалить" />
+                                                                  <TextField fx:id="secondDyeValueTextField" layoutX="212.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="2 краситель" />
+                                                                  <TextField fx:id="thirdDyeValueTextField" layoutX="302.0" layoutY="39.0" prefHeight="25.0" prefWidth="83.0" promptText="3 краситель" />
+                                                                  <TextField fx:id="lValueTextField" layoutX="392.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="L" />
+                                                                  <TextField fx:id="aValueTextField" layoutX="473.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="a" />
+                                                                  <TextField fx:id="bValueTextField" layoutX="553.0" layoutY="39.0" prefHeight="25.0" prefWidth="74.0" promptText="b" />
+                                                                  <ComboBox fx:id="batchNameComboBox" layoutX="14.0" layoutY="39.0" prefHeight="25.0" prefWidth="102.0" promptText="Партия" />
                                                                </children>
                                                             </AnchorPane>
                                                          </content>
@@ -146,13 +146,14 @@
                                                    <top>
                                                       <TableView fx:id="dtsTable" minHeight="-Infinity" prefHeight="260.0" prefWidth="300.0" BorderPane.alignment="CENTER">
                                                          <columns>
-                                                            <TableColumn fx:id="colDtsBatch" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" text="Партия" />
-                                                            <TableColumn fx:id="colDtsFirstDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 1 красит." />
-                                                            <TableColumn fx:id="colDtsSecondDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 2 красит." />
-                                                            <TableColumn fx:id="colDtsThirdDyeConc" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Конц. 3 красит." />
-                                                            <TableColumn fx:id="colDtsLValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. L" />
-                                                            <TableColumn fx:id="colDtsAValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. a" />
-                                                            <TableColumn fx:id="colDtsBValue" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" text="Цвет. коорд. b" />
+                                                            <TableColumn fx:id="colDtsID" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" text="№" />
+                                                            <TableColumn fx:id="colDtsBatch" maxWidth="115.0" minWidth="115.0" prefWidth="115.0" text="Партия" />
+                                                            <TableColumn fx:id="colDtsFirstDyeConc" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Конц. 1 красит." />
+                                                            <TableColumn fx:id="colDtsSecondDyeConc" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Конц. 2 красит." />
+                                                            <TableColumn fx:id="colDtsThirdDyeConc" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Конц. 3 красит." />
+                                                            <TableColumn fx:id="colDtsLValue" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Цвет. коорд. L" />
+                                                            <TableColumn fx:id="colDtsAValue" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Цвет. коорд. a" />
+                                                            <TableColumn fx:id="colDtsBValue" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" text="Цвет. коорд. b" />
                                                          </columns>
                                                          <BorderPane.margin>
                                                             <Insets bottom="5.0" top="5.0" />

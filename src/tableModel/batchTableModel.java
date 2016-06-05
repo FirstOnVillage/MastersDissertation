@@ -4,13 +4,13 @@ package tableModel;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-public class batchTableModel
+public class BatchTableModel
 {
     private final SimpleIntegerProperty batchIdCol;
     private final SimpleStringProperty batchNameCol;
     private final SimpleStringProperty addByUserBatchCol;
 
-    public batchTableModel(Integer id, String name, String addByUser)
+    public BatchTableModel(Integer id, String name, String addByUser)
     {
         this.batchIdCol = new SimpleIntegerProperty(id);
         this.batchNameCol = new SimpleStringProperty(name);

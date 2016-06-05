@@ -28,8 +28,8 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.TrainingSetScore;
 import org.encog.neural.networks.training.anneal.NeuralSimulatedAnnealing;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
-import tableModel.batchTableModel;
-import tableModel.dataTrainingSetTableModel;
+import tableModel.BatchTableModel;
+import tableModel.DataTrainingSetTableModel;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -46,31 +46,34 @@ public class MainFrameController implements Initializable
     private BasicNetwork network;
     public static String currentUser;
     private int batchSelRow;
+    private int dtsSelRow;
 
     @FXML
-    TableView<batchTableModel> batchTable;
+    private TableView<BatchTableModel> batchTable;
     @FXML
-    TableColumn colBatchID = new TableColumn();
+    private TableColumn colBatchID = new TableColumn();
     @FXML
-    TableColumn colBatchName = new TableColumn();
+    private TableColumn colBatchName = new TableColumn();
     @FXML
-    TableColumn colBatchUser = new TableColumn();
+    private TableColumn colBatchUser = new TableColumn();
     @FXML
-    TableView<dataTrainingSetTableModel> dtsTable;
+    private TableView<DataTrainingSetTableModel> dtsTable;
     @FXML
-    TableColumn colDtsBatch = new TableColumn();
+    private TableColumn colDtsID = new TableColumn();
     @FXML
-    TableColumn colDtsFirstDyeConc = new TableColumn();
+    private TableColumn colDtsBatch = new TableColumn();
     @FXML
-    TableColumn colDtsSecondDyeConc = new TableColumn();
+    private TableColumn colDtsFirstDyeConc = new TableColumn();
     @FXML
-    TableColumn colDtsThirdDyeConc = new TableColumn();
+    private TableColumn colDtsSecondDyeConc = new TableColumn();
     @FXML
-    TableColumn colDtsLValue = new TableColumn();
+    private TableColumn colDtsThirdDyeConc = new TableColumn();
     @FXML
-    TableColumn colDtsAValue = new TableColumn();
+    private TableColumn colDtsLValue = new TableColumn();
     @FXML
-    TableColumn colDtsBValue = new TableColumn();
+    private TableColumn colDtsAValue = new TableColumn();
+    @FXML
+    private TableColumn colDtsBValue = new TableColumn();
     @FXML
     private TextArea logTextArea;
     @FXML
@@ -87,6 +90,20 @@ public class MainFrameController implements Initializable
     private TextField batchIdTextField;
     @FXML
     private TextField batchNameTextField;
+    @FXML
+    private ComboBox batchNameComboBox;
+    @FXML
+    private TextField firstDyeValueTextField;
+    @FXML
+    private TextField secondDyeValueTextField;
+    @FXML
+    private TextField thirdDyeValueTextField;
+    @FXML
+    private TextField lValueTextField;
+    @FXML
+    private TextField aValueTextField;
+    @FXML
+    private TextField bValueTextField;
     @FXML
     private Button testButton;
     @FXML
@@ -195,6 +212,7 @@ public class MainFrameController implements Initializable
             JOptionPane.showMessageDialog(null, ex);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     @FXML
@@ -217,6 +235,7 @@ public class MainFrameController implements Initializable
             JOptionPane.showMessageDialog(null, ex);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     @FXML
@@ -234,6 +253,86 @@ public class MainFrameController implements Initializable
             JOptionPane.showMessageDialog(null, ex);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
+    }
+
+    @FXML
+    private void addDtsTableItemButtonAction(ActionEvent actionEvent)
+    {
+        Statement st;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "insert into datatrainingset (" +
+                    "batch, firstdye, seconddye, thirddye, colorcoordinates) value (" +
+                    insertDtsTableBatchDataForDB() +
+                    ", " +
+                    insertDtsTableDataForDB("firstdye", "concValue", firstDyeValueTextField.getText(), "idFirstDye") +
+                    ", " +
+                    insertDtsTableDataForDB(
+                            "seconddye", "concValue", secondDyeValueTextField.getText(), "idSecondDye") +
+                    ", " +
+                    insertDtsTableDataForDB("thirddye", "concValue", thirdDyeValueTextField.getText(), "idThirdDye") +
+                    ", " +
+                    insertDtsTableColorCoordDataForDB() +
+                    ")";
+            st.executeUpdate(recordQuery);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        dtsTable.getItems().setAll(getDtsTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
+    }
+
+    @FXML
+    private void updateDtsTableItemButtonAction(ActionEvent actionEvent)
+    {
+        updateDtsTableBatchDataForDB();
+        updateDtsTableDataForDB("firstdye","concValue", firstDyeValueTextField.getText(), "idfirstdye", "firstdye");
+        updateDtsTableDataForDB("seconddye","concValue", secondDyeValueTextField.getText(), "idseconddye", "seconddye");
+        updateDtsTableDataForDB("thirddye","concValue", thirdDyeValueTextField.getText(), "idthirddye", "seconddye");
+        updateDtsTableColorCoordDataForDB();
+
+        dtsTable.getItems().setAll(getDtsTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
+    }
+
+    @FXML
+    private void deleteDtsTableItemButtonAction(ActionEvent actionEvent)
+    {
+        Statement deleteSt, searchSt;
+        ResultSet  searchRs;
+        Integer firstDyeId = 0;
+        Integer secondDyeId = 0;
+        Integer thirdDyeId = 0;
+        Integer colCoordId = 0;
+        try
+        {
+            searchSt = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from datatrainingset";
+            searchRs = searchSt.executeQuery(recordQuery);
+            while (searchRs.next())
+            {
+                firstDyeId = searchRs.getInt("firstDye");
+                secondDyeId = searchRs.getInt("secondDye");
+                thirdDyeId = searchRs.getInt("thirdDye");
+                colCoordId = searchRs.getInt("colorCoordinates");
+            }
+            deleteSt = MySQLConnect.getConnection().createStatement();
+            recordQuery = "delete from datatrainingset where iddatatrainingset = " +
+                    batchTable.getColumns().get(0).getCellData(batchSelRow).toString();
+            deleteSt.execute(recordQuery);
+            deleteDataFromSelectTableDB("firstDye", "idfirstDye", firstDyeId);
+            deleteDataFromSelectTableDB("secondDye", "idsecondDye", secondDyeId);
+            deleteDataFromSelectTableDB("thirdDye", "idthirdDye", thirdDyeId);
+            deleteDataFromSelectTableDB("colorCoordinates", "idcolorCoordinates", colCoordId);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        dtsTable.getItems().setAll(getDtsTableInfo());
+        batchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     public static double trainNetwork(final String what,
@@ -264,18 +363,18 @@ public class MainFrameController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        colBatchID.setCellValueFactory(new PropertyValueFactory<batchTableModel, Integer>("batchIdCol"));
-        colBatchName.setCellValueFactory(new PropertyValueFactory<batchTableModel, String>("batchNameCol"));
-        colBatchUser.setCellValueFactory(new PropertyValueFactory<batchTableModel, String>("addByUserBatchCol"));
+        colBatchID.setCellValueFactory(new PropertyValueFactory<BatchTableModel, Integer>("batchIdCol"));
+        colBatchName.setCellValueFactory(new PropertyValueFactory<BatchTableModel, String>("batchNameCol"));
+        colBatchUser.setCellValueFactory(new PropertyValueFactory<BatchTableModel, String>("addByUserBatchCol"));
 
-        colDtsBatch.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, String>("dtsBatchCol"));
-        colDtsFirstDyeConc.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsFirstDyeConcCol"));
-        colDtsSecondDyeConc.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsSecondDyeConcCol"));
-        colDtsThirdDyeConc.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsThirdDyeConcCol"));
-        colDtsLValue.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsLValueCol"));
-        colDtsAValue.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsAValueCol"));
-        colDtsBValue.setCellValueFactory(new PropertyValueFactory<dataTrainingSetTableModel, Double>("dtsBValueCol"));
-
+        colDtsID.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Integer>("dtsIdCol"));
+        colDtsBatch.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, String>("dtsBatchCol"));
+        colDtsFirstDyeConc.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsFirstDyeConcCol"));
+        colDtsSecondDyeConc.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsSecondDyeConcCol"));
+        colDtsThirdDyeConc.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsThirdDyeConcCol"));
+        colDtsLValue.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsLValueCol"));
+        colDtsAValue.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsAValueCol"));
+        colDtsBValue.setCellValueFactory(new PropertyValueFactory<DataTrainingSetTableModel, Double>("dtsBValueCol"));
 
         batchTable.getItems().setAll(getBatchTableInfo());
         dtsTable.getItems().setAll(getDtsTableInfo());
@@ -285,9 +384,28 @@ public class MainFrameController implements Initializable
             batchIdTextField.setText(batchTable.getColumns().get(0).getCellData(batchSelRow).toString());
             batchNameTextField.setText(batchTable.getColumns().get(1).getCellData(batchSelRow).toString());
         });
+
+        dtsTable.setOnMouseClicked(event -> {
+            dtsSelRow = dtsTable.getSelectionModel().getSelectedCells().get(0).getRow();
+            for (int i = 0; i < batchNameComboBox.getItems().size(); i++)
+            {
+                if (dtsTable.getColumns().get(1).getCellData(dtsSelRow).toString().equals(batchNameComboBox.getItems().get(i)))
+                {
+                    batchNameComboBox.getSelectionModel().select(i);
+                }
+            }
+            firstDyeValueTextField.setText(dtsTable.getColumns().get(2).getCellData(dtsSelRow).toString());
+            secondDyeValueTextField.setText(dtsTable.getColumns().get(3).getCellData(dtsSelRow).toString());
+            thirdDyeValueTextField.setText(dtsTable.getColumns().get(4).getCellData(dtsSelRow).toString());
+            lValueTextField.setText(dtsTable.getColumns().get(5).getCellData(dtsSelRow).toString());
+            aValueTextField.setText(dtsTable.getColumns().get(6).getCellData(dtsSelRow).toString());
+            bValueTextField.setText(dtsTable.getColumns().get(7).getCellData(dtsSelRow).toString());
+        });
+
+        batchNameComboBox.getItems().setAll(getBatchNames());
     }
 
-    private List<batchTableModel> getBatchTableInfo()
+    private List<BatchTableModel> getBatchTableInfo()
     {
         List list = new LinkedList();
         Statement batchSt, usersSt;
@@ -310,7 +428,7 @@ public class MainFrameController implements Initializable
                 {
                     changedByUser = usersRs.getString("name");
                 }
-                list.add(new batchTableModel(id, name, changedByUser));
+                list.add(new BatchTableModel(id, name, changedByUser));
             }
         } catch (SQLException e)
         {
@@ -319,12 +437,14 @@ public class MainFrameController implements Initializable
         return list;
     }
 
-    private List<dataTrainingSetTableModel> getDtsTableInfo()
+    private List<DataTrainingSetTableModel> getDtsTableInfo()
     {
         List list = new LinkedList();
-        Statement dtsSt, batchSt, firstDyeSt, SecondDyeSt, ThirdDyeSt, colCoordSt;
-        ResultSet dtsRs, batchRs, firstDyeRt, SecondDyeRt, ThirdDyeRt, colCoordRt;
-        String batch = "";
+        Statement dtsSt, colorCoordSt;
+        ResultSet dtsRs, colorCoordRs;
+        Double lValue = 0.0;
+        Double aValue = 0.0;
+        Double bValue = 0.0;
         try
         {
             dtsSt = MySQLConnect.getConnection().createStatement();
@@ -332,21 +452,236 @@ public class MainFrameController implements Initializable
             dtsRs = dtsSt.executeQuery(dtsRecordQuery);
             while (dtsRs.next())
             {
-                //Integer id = dtsRs.getInt("idDataTrainingSet");
+                Integer id = dtsRs.getInt("iddatatrainingset");
                 Integer idBatch = dtsRs.getInt("batch");
                 Integer firstDyeId = dtsRs.getInt("firstDye");
                 Integer secondDyeId = dtsRs.getInt("secondDye");
                 Integer thirdDyeId = dtsRs.getInt("thirdDye");
                 Integer colCoordId = dtsRs.getInt("colorCoordinates");
-
-                batchSt = MySQLConnect.getConnection().createStatement();
-                String batchRecordQuery = "Select * from batch where idBatch = " + idBatch;
-                batchRs = batchSt.executeQuery(batchRecordQuery);
-                while (batchRs.next())
+                colorCoordSt = MySQLConnect.getConnection().createStatement();
+                String colorCoordRecordQuery = "Select * from colorcoordinates where idColorCoordinates = " + colCoordId;
+                colorCoordRs = colorCoordSt.executeQuery(colorCoordRecordQuery);
+                while (colorCoordRs.next())
                 {
-                    batch = batchRs.getString("name");
+                    lValue = colorCoordRs.getDouble("lValue");
+                    aValue = colorCoordRs.getDouble("aValue");
+                    bValue = colorCoordRs.getDouble("bValue");
                 }
-                list.add(new dataTrainingSetTableModel("batch", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+                list.add(new DataTrainingSetTableModel(
+                        id,
+                        getValuePerIdFromDB("batch", "idBatch", idBatch.toString(), "name").toString(),
+                        Double.valueOf(getValuePerIdFromDB("firstdye", "idFirstDye", firstDyeId.toString(), "concValue").toString()),
+                        Double.valueOf(getValuePerIdFromDB("seconddye", "idSecondDye", secondDyeId.toString(), "concValue").toString()),
+                        Double.valueOf(getValuePerIdFromDB("thirddye", "idThirdDye", thirdDyeId.toString(), "concValue").toString()),
+                        lValue,
+                        aValue,
+                        bValue));
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return list;
+    }
+
+    private Object getValuePerIdFromDB(String table, String idName, String idValue, String nameField)
+    {
+        Object result = null;
+        try
+        {
+            Statement st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from " +  table + " where " + idName + " = " + idValue;
+            ResultSet rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                result = rs.getObject(nameField);
+            }
+            return result;
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private Integer insertDtsTableDataForDB(String table, String fieldName, String fieldValue, String idName)
+    {
+        Integer result = 0;
+        try
+        {
+            Statement insetSt = MySQLConnect.getConnection().createStatement();
+            String insercRecordQuery = "insert into " +  table + " ( " + fieldName + " ) value ( " + fieldValue + ")";
+            insetSt.executeUpdate(insercRecordQuery);
+            Statement getSt = MySQLConnect.getConnection().createStatement();
+            String getRecordQuery = "select * from " + table + " where " + fieldName + " = " + fieldValue;
+            ResultSet rs = getSt.executeQuery(getRecordQuery);
+            while (rs.next())
+            {
+                result = rs.getInt(idName);
+            }
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        return result;
+    }
+
+    private Integer insertDtsTableBatchDataForDB()
+    {
+        Integer result = 0;
+        try
+        {
+            Statement st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "select * from batch where name = '" + batchNameComboBox.getValue().toString() + "'";
+            ResultSet rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                result = rs.getInt("idBatch");
+            }
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        return result;
+    }
+
+    private Integer insertDtsTableColorCoordDataForDB()
+    {
+        Integer result = 0;
+        try
+        {
+            Statement insetSt = MySQLConnect.getConnection().createStatement();
+            String insercRecordQuery = "insert into colorcoordinates (lValue, aValue, bValue) value (" +
+                    lValueTextField.getText() +
+                    ", " +
+                    aValueTextField.getText() +
+                    ", " +
+                    bValueTextField.getText() +
+                    ")";
+            insetSt.executeUpdate(insercRecordQuery);
+            Statement getSt = MySQLConnect.getConnection().createStatement();
+            String getRecordQuery = "select * from colorcoordinates where lValue = " +
+                    lValueTextField.getText() +
+                    " and aValue = " +
+                    aValueTextField.getText() +
+                    " and bValue = " +
+                    bValueTextField.getText();
+            ResultSet rs = getSt.executeQuery(getRecordQuery);
+            while (rs.next())
+            {
+                result = rs.getInt("idColorCoordinates");
+            }
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        return result;
+    }
+
+    private void updateDtsTableDataForDB(
+            String table, String fieldName, String fieldValue, String idName, String fieldDtstableName)
+    {
+        Statement st;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "update " + table + " set " + fieldName + " = " + fieldValue +
+                    " where " + idName + " = " +
+                    getDataValueById(fieldDtstableName);
+            st.execute(recordQuery);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+    }
+
+    private void updateDtsTableBatchDataForDB()
+    {
+        Statement st;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "update datatrainingset set batch = " +
+                    insertDtsTableBatchDataForDB() +
+                    " where iddatatrainingset = " + dtsTable.getColumns().get(0).getCellData(dtsSelRow).toString();
+            st.execute(recordQuery);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+    }
+
+    private void updateDtsTableColorCoordDataForDB()
+    {
+        Statement st;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "update colorcoordinates set lValue = " + lValueTextField.getText() +
+                    " where idcolorcoordinates = " +
+                    getDataValueById("idcolorcoordinates");
+            st.execute(recordQuery);
+            recordQuery = "update colorcoordinates set aValue = " + aValueTextField.getText() +
+                    " where idcolorcoordinates = " +
+                    getDataValueById("idcolorcoordinates");
+            st.execute(recordQuery);
+            recordQuery = "update colorcoordinates set bValue = " + bValueTextField.getText() +
+                    " where idcolorcoordinates = " +
+                    getDataValueById("idcolorcoordinates");
+            st.execute(recordQuery);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+    }
+
+    private Integer getDataValueById(String fieldName)
+    {
+        Integer result = 0;
+        try
+        {
+            Statement st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "select * from datatrainingset where idDataTrainingSet = " +
+                    dtsTable.getColumns().get(0).getCellData(dtsSelRow).toString();
+            ResultSet rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                result = rs.getInt(fieldName);
+            }
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        return result;
+    }
+
+    private void deleteDataFromSelectTableDB(String table, String idName, Integer idValue)
+    {
+        Statement st;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "delete from " + table + " where " + idName + " = " + idValue;
+            st.execute(recordQuery);
+        } catch (SQLException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+    }
+
+    public List<String> getBatchNames()
+    {
+        Statement st;
+        ResultSet rs;
+        List list = new LinkedList();
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = ("Select * from batch");
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                list.add(rs.getString("name"));
             }
         } catch (SQLException e)
         {
