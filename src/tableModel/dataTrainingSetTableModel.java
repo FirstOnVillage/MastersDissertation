@@ -1,13 +1,13 @@
 package tableModel;
 
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-/**
- * Created by jelus on 04.06.2016.
- */
-public class dataTrainingSetTableModel
+
+public class DataTrainingSetTableModel
 {
+    private final SimpleIntegerProperty dtsIdCol;
     private final SimpleStringProperty dtsBatchCol;
     private final SimpleDoubleProperty dtsFirstDyeConcCol;
     private final SimpleDoubleProperty dtsSecondDyeConcCol;
@@ -16,7 +16,8 @@ public class dataTrainingSetTableModel
     private final SimpleDoubleProperty dtsAValueCol;
     private final SimpleDoubleProperty dtsBValueCol;
 
-    public dataTrainingSetTableModel(String batch,
+    public DataTrainingSetTableModel(Integer id,
+                                     String batch,
                                      Double firstDyeConc,
                                      Double secondDyeConc,
                                      Double thirdDyeConc,
@@ -24,6 +25,7 @@ public class dataTrainingSetTableModel
                                      Double aValue,
                                      Double bValue)
     {
+        this.dtsIdCol = new SimpleIntegerProperty(id);
         this.dtsBatchCol = new SimpleStringProperty(batch);
         this.dtsFirstDyeConcCol = new SimpleDoubleProperty(firstDyeConc);
         this.dtsSecondDyeConcCol = new SimpleDoubleProperty(secondDyeConc);
@@ -33,40 +35,47 @@ public class dataTrainingSetTableModel
         this.dtsBValueCol = new SimpleDoubleProperty(bValue);
     }
 
-    public String getDTSBatchCol()
+    public Integer getDtsIdCol()
+    {
+        return dtsIdCol.get();
+    }
+
+    public void setDtsIdCol(Integer id) { dtsIdCol.set(id); }
+
+    public String getDtsBatchCol()
     {
         return dtsBatchCol.get();
     }
 
-    public void setDTSBatchCol(String batch) { dtsBatchCol.set(batch); }
+    public void setDtsBatchCol(String batch) { dtsBatchCol.set(batch); }
 
-    public Double getDTSFirstDyeConcCol() { return dtsFirstDyeConcCol.get(); }
+    public Double getDtsFirstDyeConcCol() { return dtsFirstDyeConcCol.get(); }
 
-    public void setDTSFirstDyeConcCol(Double conc) { dtsFirstDyeConcCol.set(conc); }
+    public void setDtsFirstDyeConcCol(Double conc) { dtsFirstDyeConcCol.set(conc); }
 
-    public Double getDTSSecondDyeConcCol()
+    public Double getDtsSecondDyeConcCol()
     {
         return dtsSecondDyeConcCol.get();
     }
 
-    public void setDTSSecondDyeConcCol(Double conc) { dtsSecondDyeConcCol.set(conc); }
+    public void setDtsSecondDyeConcCol(Double conc) { dtsSecondDyeConcCol.set(conc); }
 
-    public Double getDTSThirdDyeConcCol()
+    public Double getDtsThirdDyeConcCol()
     {
         return dtsThirdDyeConcCol.get();
     }
 
-    public void setDTSThirdDyeConcCol(Double conc) { dtsThirdDyeConcCol.set(conc); }
+    public void setDtsThirdDyeConcCol(Double conc) { dtsThirdDyeConcCol.set(conc); }
 
-    public Double getDTSLValueCol() { return dtsLValueCol.get(); }
+    public Double getDtsLValueCol() { return dtsLValueCol.get(); }
 
-    public void setDTSLValueCol(Double value) { dtsLValueCol.set(value); }
+    public void setDtsLValueCol(Double value) { dtsLValueCol.set(value); }
 
-    public Double getDTSAValueCol() { return dtsAValueCol.get(); }
+    public Double getDtsAValueCol() { return dtsAValueCol.get(); }
 
-    public void setDTSAValueCol(Double value) { dtsAValueCol.set(value); }
+    public void setDtsAValueCol(Double value) { dtsAValueCol.set(value); }
 
-    public Double getDTSBValueCol() { return dtsBValueCol.get(); }
+    public Double getDtsBValueCol() { return dtsBValueCol.get(); }
 
-    public void setDTSBValueCol(Double value) { dtsBValueCol.set(value); }
+    public void setDtsBValueCol(Double value) { dtsBValueCol.set(value); }
 }

@@ -38,38 +38,47 @@
                                  <left>
                                 <Pane prefHeight="455.0" prefWidth="370.0" BorderPane.alignment="CENTER">
                                   <children>
-                                          <TitledPane animated="false" collapsible="false" layoutY="206.0" prefHeight="220.0" prefWidth="371.0" text="Подбор рецептуры окрашивания">
+                                          <TitledPane animated="false" collapsible="false" layoutY="166.0" prefHeight="260.0" text="Подбор рецептуры окрашивания">
                                             <content>
-                                              <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="214.0" prefWidth="375.0">
+                                              <AnchorPane>
                                                    <children>
-                                                <Rectangle fx:id="showColorRectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="100.0" layoutX="209.0" layoutY="66.0" stroke="BLACK" strokeType="INSIDE" width="100.0" />
-                                                <Label layoutX="178.0" layoutY="32.0" text="Оттенок полимерной пленки" />
-                                                <Button layoutX="146.0" layoutY="175.0" mnemonicParsing="false" onAction="#computeButtonAction" text="Определить" />
-                                                <Label layoutX="37.0" layoutY="107.0" text="a" />
-                                                <Label layoutX="37.0" layoutY="139.0" text="b" />
-                                                <TextField fx:id="idealATextField" layoutX="65.0" layoutY="103.0" prefWidth="63.0" text="20" />
-                                                <TextField fx:id="idealBTextField" layoutX="65.0" layoutY="135.0" prefWidth="63.0" text="40" />
-                                                      <TextField fx:id="idealLTextField" layoutX="64.0" layoutY="72.0" prefHeight="25.0" prefWidth="65.0" text="70" />
-                                                      <Label layoutX="38.0" layoutY="76.0" text="L" />
-                                                      <Label layoutX="37.0" layoutY="32.0" text="Цветовые координаты" />
+                                                <Rectangle fx:id="showColorRectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="100.0" layoutX="231.0" layoutY="41.0" stroke="BLACK" strokeType="INSIDE" width="100.0" />
+                                                <Label layoutX="201.0" layoutY="16.0" text="Оттенок полимерной пленки" />
+                                                <Button layoutX="243.0" layoutY="210.0" mnemonicParsing="false" onAction="#computeButtonAction" text="Подобрать" />
+                                                <Label layoutX="48.0" layoutY="82.0" text="a" />
+                                                <Label layoutX="48.0" layoutY="114.0" text="b" />
+                                                <TextField fx:id="idealATextField" layoutX="76.0" layoutY="78.0" prefWidth="63.0" promptText="a" text="20" />
+                                                <TextField fx:id="idealBTextField" layoutX="76.0" layoutY="110.0" prefWidth="63.0" promptText="b" text="40" />
+                                                      <TextField fx:id="idealLTextField" layoutX="75.0" layoutY="47.0" prefHeight="25.0" prefWidth="65.0" promptText="L" text="70" />
+                                                      <Label layoutX="49.0" layoutY="51.0" text="L" />
+                                                      <Label layoutX="45.0" layoutY="16.0" text="Цветовые координаты" />
+                                                      <Separator layoutX="153.59999999999997" layoutY="153.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                                      <ComboBox fx:id="dyeNumberComboBox" layoutX="77.0" layoutY="197.0" prefHeight="25.0" prefWidth="62.0" />
+                                                      <Label layoutX="43.0" layoutY="170.0" text="Количество красителей" />
+                                                      <Button layoutX="208.0" layoutY="175.0" mnemonicParsing="false" text="Проверить доступность" />
                                                    </children>
                                                 </AnchorPane>
                                             </content>
+                                             <padding>
+                                                <Insets left="1.0" right="1.0" />
+                                             </padding>
                                           </TitledPane>
-                                          <Pane prefHeight="206.0" prefWidth="370.0">
+                                          <Pane prefHeight="168.0" prefWidth="375.0">
                                              <children>
-                                          <Button fx:id="testButton" cancelButton="false" layoutX="122.0" layoutY="167.0" mnemonicParsing="false" onAction="#testButtonAction" text="Провести обучение" />
+                                          <Button fx:id="testButton" cancelButton="false" layoutX="125.0" layoutY="121.0" mnemonicParsing="false" onAction="#testButtonAction" text="Провести обучение" />
                                                 <Label layoutX="34.0" layoutY="23.0" text="Кол-во нейронов первого скрытого слоя" />
                                                 <Label layoutX="35.0" layoutY="54.0" text="Кол-во нейронов второго скрытого слоя" />
-                                                <TextField fx:id="firstHiddenLayerTextField" layoutX="272.0" layoutY="19.0" prefHeight="25.0" prefWidth="65.0" text="6" />
-                                                <TextField fx:id="secondHiddenLayerTextField" layoutX="272.0" layoutY="50.0" prefHeight="25.0" prefWidth="65.0" text="12" />
+                                                <TextField fx:id="firstHiddenLayerTextField" layoutX="296.0" layoutY="19.0" prefHeight="25.0" prefWidth="65.0" promptText="1 слой" text="6" />
+                                                <TextField fx:id="secondHiddenLayerTextField" layoutX="296.0" layoutY="50.0" prefHeight="25.0" prefWidth="65.0" promptText="2 слой" text="12" />
+                                                <Label layoutX="34.0" layoutY="85.0" text="Обучающая партия" />
+                                                <ComboBox fx:id="availableBatchNameComboBox" layoutX="243.0" layoutY="81.0" prefHeight="25.0" prefWidth="123.0" promptText="Партия" />
                                              </children>
                                           </Pane>
                                   </children>
                                 </Pane>
                                  </left>
                                  <right>
-                                <TextArea id="logTextField" fx:id="logTextArea" prefHeight="455.0" prefWidth="348.0" wrapText="true" BorderPane.alignment="CENTER" />
+                                <TextArea id="logTextField" fx:id="logTextArea" prefHeight="426.0" prefWidth="348.0" wrapText="true" BorderPane.alignment="CENTER" />
                                  </right>
                               </BorderPane>
                            </children>
@@ -164,11 +173,6 @@
                                              </children></AnchorPane>
                                     </content>
                                   </Tab>
-                                    <Tab text="Таблица 3">
-                                      <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                      </content>
-                                    </Tab>
                                 </tabs>
                               </TabPane>
                            </children></AnchorPane>

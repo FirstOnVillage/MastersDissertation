@@ -105,6 +105,10 @@ public class MainFrameController implements Initializable
     @FXML
     private TextField bValueTextField;
     @FXML
+    private ComboBox dyeNumberComboBox;
+    @FXML
+    private ComboBox availableBatchNameComboBox;
+    @FXML
     private Button testButton;
     @FXML
     private Rectangle showColorRectangle;
@@ -149,7 +153,9 @@ public class MainFrameController implements Initializable
         network.getStructure().finalizeStructure();
         network.reset();
 
-        MLDataSet trainingSet = new BasicMLDataSet(Data.INPUT, Data.IDEAL);
+        MLDataSet trainingSet = new BasicMLDataSet(
+                Data.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
+                Data.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
 
         // train the neural network
         /*final ResilientPropagation train = new ResilientPropagation(network, trainingSet);
@@ -173,6 +179,8 @@ public class MainFrameController implements Initializable
                     + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
         }
         testButton.setDisable(true);
+//        Data.printArray(Data.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+//        Data.printArray(Data.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
     }
 
     @FXML
@@ -191,7 +199,6 @@ public class MainFrameController implements Initializable
         logTextArea.setText(logTextArea.getText() + "\n\nКонцентрация красителей: ");
         for(double element: output )
             logTextArea.setText(logTextArea.getText() + "\n" + element);
-        //logTextArea.selectEnd();
         logTextArea.end();
     }
 
@@ -213,6 +220,7 @@ public class MainFrameController implements Initializable
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
+        availableBatchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     @FXML
@@ -236,6 +244,7 @@ public class MainFrameController implements Initializable
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
+        availableBatchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     @FXML
@@ -254,6 +263,7 @@ public class MainFrameController implements Initializable
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
+        availableBatchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     @FXML
@@ -321,7 +331,7 @@ public class MainFrameController implements Initializable
             }
             deleteSt = MySQLConnect.getConnection().createStatement();
             recordQuery = "delete from datatrainingset where iddatatrainingset = " +
-                    batchTable.getColumns().get(0).getCellData(batchSelRow).toString();
+                    dtsTable.getColumns().get(0).getCellData(dtsSelRow).toString();
             deleteSt.execute(recordQuery);
             deleteDataFromSelectTableDB("firstDye", "idfirstDye", firstDyeId);
             deleteDataFromSelectTableDB("secondDye", "idsecondDye", secondDyeId);
@@ -333,6 +343,7 @@ public class MainFrameController implements Initializable
         }
         dtsTable.getItems().setAll(getDtsTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
+        availableBatchNameComboBox.getItems().setAll(getBatchNames());
     }
 
     public static double trainNetwork(final String what,
@@ -403,6 +414,10 @@ public class MainFrameController implements Initializable
         });
 
         batchNameComboBox.getItems().setAll(getBatchNames());
+        dyeNumberComboBox.getItems().setAll(getDyeNumber());
+        availableBatchNameComboBox.getItems().setAll(getBatchNames());
+        dyeNumberComboBox.getSelectionModel().select(1);
+        availableBatchNameComboBox.getSelectionModel().select(0);
     }
 
     private List<BatchTableModel> getBatchTableInfo()
@@ -579,7 +594,7 @@ public class MainFrameController implements Initializable
     }
 
     private void updateDtsTableDataForDB(
-            String table, String fieldName, String fieldValue, String idName, String fieldDtstableName)
+            String table, String fieldName, String fieldValue, String idName, String fieldDtsTableName)
     {
         Statement st;
         try
@@ -587,7 +602,7 @@ public class MainFrameController implements Initializable
             st = MySQLConnect.getConnection().createStatement();
             String recordQuery = "update " + table + " set " + fieldName + " = " + fieldValue +
                     " where " + idName + " = " +
-                    getDataValueById(fieldDtstableName);
+                    getDataValueById(fieldDtsTableName);
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
@@ -619,15 +634,15 @@ public class MainFrameController implements Initializable
             st = MySQLConnect.getConnection().createStatement();
             String recordQuery = "update colorcoordinates set lValue = " + lValueTextField.getText() +
                     " where idcolorcoordinates = " +
-                    getDataValueById("idcolorcoordinates");
+                    getDataValueById("colorcoordinates");
             st.execute(recordQuery);
             recordQuery = "update colorcoordinates set aValue = " + aValueTextField.getText() +
                     " where idcolorcoordinates = " +
-                    getDataValueById("idcolorcoordinates");
+                    getDataValueById("colorcoordinates");
             st.execute(recordQuery);
             recordQuery = "update colorcoordinates set bValue = " + bValueTextField.getText() +
                     " where idcolorcoordinates = " +
-                    getDataValueById("idcolorcoordinates");
+                    getDataValueById("colorcoordinates");
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
@@ -687,6 +702,15 @@ public class MainFrameController implements Initializable
         {
             JOptionPane.showMessageDialog(null, e);
         }
+        return list;
+    }
+
+    public List<String> getDyeNumber()
+    {
+        List list = new LinkedList();
+        list.add(1);
+        list.add(2);
+        list.add(3);
         return list;
     }
 

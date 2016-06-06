@@ -1,5 +1,10 @@
 package sample;
 
+import javax.swing.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class Data
 {
     public static double INPUT[][] = {
@@ -57,4 +62,140 @@ public class Data
             { 0.242, 0.035 },
             { 0.198, 0.053 }
     };
+
+    public static double[][] getColorCoordValuesFromDB(String batchName)
+    {
+        int count = getCountBatchElements(batchName);
+        double[][] array = new double[count][3];
+        Statement dtsSt, colorCoordSt;
+        ResultSet dtsRs, colorCoordRs;
+        int i = 0;
+        try
+        {
+            dtsSt = MySQLConnect.getConnection().createStatement();
+            String dtsRecordQuery = "Select * from datatrainingset where batch =" + getIdByNameFromBatchDB(batchName);
+            dtsRs = dtsSt.executeQuery(dtsRecordQuery);
+            while (dtsRs.next())
+            {
+                Integer colCoordId = dtsRs.getInt("colorCoordinates");
+                colorCoordSt = MySQLConnect.getConnection().createStatement();
+                String colorCoordRecordQuery = "Select * from colorcoordinates where idColorCoordinates = " + colCoordId;
+                colorCoordRs = colorCoordSt.executeQuery(colorCoordRecordQuery);
+                while (colorCoordRs.next())
+                {
+                    array[i][0] = colorCoordRs.getDouble("lValue");
+                    array[i][1] = colorCoordRs.getDouble("aValue");
+                    array[i][2] = colorCoordRs.getDouble("bValue");
+                }
+                i++;
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return array;
+    }
+
+    public static double[][] getDyeValuesFromDB(String batchName)
+    {
+        int count = getCountBatchElements(batchName);
+        double[][] array = new double[count][2];
+        Statement dtsSt;
+        ResultSet dtsRs;
+        int i = 0;
+        try
+        {
+            dtsSt = MySQLConnect.getConnection().createStatement();
+            String dtsRecordQuery = "Select * from datatrainingset where batch =" + getIdByNameFromBatchDB(batchName);
+            dtsRs = dtsSt.executeQuery(dtsRecordQuery);
+            while (dtsRs.next())
+            {
+                Integer firstDyeId = dtsRs.getInt("firstDye");
+                Integer secondDyeId = dtsRs.getInt("secondDye");
+                Integer thirdDyeId = dtsRs.getInt("thirdDye");
+                array[i][0] = Double.valueOf(getValuePerIdFromDB("firstdye", "idFirstDye", firstDyeId.toString(), "concValue").toString());
+                array[i][1] = Double.valueOf(getValuePerIdFromDB("seconddye", "idSecondDye", secondDyeId.toString(), "concValue").toString());
+                //array[i][2] = Double.valueOf(getValuePerIdFromDB("thirddye", "idThirdDye", thirdDyeId.toString(), "concValue").toString());
+                i++;
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return array;
+    }
+
+    private static Object getValuePerIdFromDB(String table, String idName, String idValue, String nameField)
+    {
+        Object result = null;
+        try
+        {
+            Statement st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from " +  table + " where " + idName + " = " + idValue;
+            ResultSet rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                result = rs.getObject(nameField);
+            }
+            return result;
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static int getCountBatchElements(String batchName)
+    {
+        int count = 0;
+        Statement st;
+        ResultSet rs;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from datatrainingset where batch = " + getIdByNameFromBatchDB(batchName);
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                count++;
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return count;
+    }
+
+    public static int getIdByNameFromBatchDB(String batchName)
+    {
+        int id = 0;
+        Statement st;
+        ResultSet rs;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from batch where name = '" + batchName + "'";
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                id = rs.getInt("idBatch");
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return id;
+    }
+
+    public static void printArray(double[][] array)
+    {
+        for(double[] row : array)
+        {
+            for (double value : row)
+            {
+                System.out.print(value + "\t");
+            }
+            System.out.println();
+        }
+    }
 }
