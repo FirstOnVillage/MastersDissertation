@@ -1,5 +1,6 @@
-package sample;
+package otherClasses;
 
+import controllers.PasswordFrameController;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;

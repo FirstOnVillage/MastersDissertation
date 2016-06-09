@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane prefHeight="480.0" prefWidth="718.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.MainFrameController">
+<AnchorPane prefHeight="480.0" prefWidth="718.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainFrameController">
   <children>
     <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <top>
@@ -44,7 +44,7 @@
                                                    <children>
                                                 <Rectangle fx:id="showColorRectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="100.0" layoutX="231.0" layoutY="41.0" stroke="BLACK" strokeType="INSIDE" width="100.0" />
                                                 <Label layoutX="201.0" layoutY="16.0" text="Оттенок полимерной пленки" />
-                                                <Button layoutX="243.0" layoutY="210.0" mnemonicParsing="false" onAction="#computeButtonAction" text="Подобрать" />
+                                                <Button fx:id="computeButton" layoutX="243.0" layoutY="210.0" mnemonicParsing="false" disable="true" onAction="#computeButtonAction" text="Подобрать" />
                                                 <Label layoutX="48.0" layoutY="82.0" text="a" />
                                                 <Label layoutX="48.0" layoutY="114.0" text="b" />
                                                 <TextField fx:id="idealATextField" layoutX="76.0" layoutY="78.0" prefWidth="63.0" promptText="a" text="20" />
@@ -65,7 +65,7 @@
                                           </TitledPane>
                                           <Pane prefHeight="168.0" prefWidth="375.0">
                                              <children>
-                                          <Button fx:id="testButton" cancelButton="false" layoutX="125.0" layoutY="121.0" mnemonicParsing="false" onAction="#testButtonAction" text="Провести обучение" />
+                                          <Button fx:id="learnButton" cancelButton="false" layoutX="125.0" layoutY="121.0" mnemonicParsing="false" onAction="#learnButtonAction" text="Провести обучение" />
                                                 <Label layoutX="34.0" layoutY="23.0" text="Кол-во нейронов первого скрытого слоя" />
                                                 <Label layoutX="35.0" layoutY="54.0" text="Кол-во нейронов второго скрытого слоя" />
                                                 <TextField fx:id="firstHiddenLayerTextField" layoutX="296.0" layoutY="19.0" prefHeight="25.0" prefWidth="65.0" promptText="1 слой" text="6" />

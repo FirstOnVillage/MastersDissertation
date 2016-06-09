@@ -1,4 +1,4 @@
-package sample;
+package otherClasses;
 
 import com.mysql.fabric.jdbc.FabricMySQLDriver;
 import javax.swing.*;

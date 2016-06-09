@@ -1,12 +1,13 @@
-package sample;
+package otherClasses;
 
 import javax.swing.*;
 
-public class Labrgb {
+public class Converter
+{
 
-    static int colR;
-    static int colG;
-    static int colB;
+    public static int colR;
+    public static int colG;
+    public static int colB;
 
     public static boolean revertLABToRGB(double colorL, double colora, double colorb)
     {

@@ -1,11 +1,11 @@
-package sample;
+package otherClasses;
 
 import javax.swing.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class Data
+public class Utilit
 {
     public static double INPUT[][] = {
             { 73.25, 27.02, 48.33 },
@@ -185,6 +185,83 @@ public class Data
             JOptionPane.showMessageDialog(null, e);
         }
         return id;
+    }
+
+    public static int getNumberOfDyes(String batchName)
+    {
+        int amount  = 0;
+        Statement st;
+        ResultSet rs;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from datatrainingset where batch = " + getIdByNameFromBatchDB(batchName);
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                int idFirtDyeValue = rs.getInt("firstDye");
+                int idSecondDyeValue = rs.getInt("secondDye");
+                int idThirdDyeValue = rs.getInt("thirdDye");
+                if (checkDyeValue("firstDye", "idFirstDye", idFirtDyeValue)) amount++;
+                if (checkDyeValue("secondDye", "idSecondDye", idSecondDyeValue)) amount++;
+                if (checkDyeValue("thirdDye", "idThirdDye", idThirdDyeValue)) amount++;
+                return amount;
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return amount;
+    }
+
+    public static boolean checkDyeValue(String table, String idName, int idDye)
+    {
+        Statement st;
+        ResultSet rs;
+        try
+        {
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from " + table + " where " + idName + " = " + idDye;
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                if (rs.getDouble("concValue") > 0) return true;
+                else return false;
+            }
+        } catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        return false;
+    }
+
+    public static boolean rgbRangeIsCorrently(String batchName, double lIdealValue, double aIdealValue, double bIdealValue)
+    {
+
+        double[][] array = getColorCoordValuesFromDB(batchName);
+        for(int i = 0; i < array.length; i++)
+        {
+            for (int j = 0; j < array[i].length; j++)
+            {
+                if ((!rangeTest(array[i][0], lIdealValue, 0.8)) ||
+                        (!rangeTest(array[i][1], aIdealValue, 0.8)) ||
+                        (!rangeTest(array[i][2], bIdealValue, 0.8))) return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean rangeTest(double firstNumber, double secondNumber, double range)
+    {
+        if (firstNumber < secondNumber)
+        {
+            if ((firstNumber / secondNumber) < range) return false;
+        }
+        else
+        {
+            if ((secondNumber / firstNumber) < range) return false;
+        }
+        return true;
     }
 
     public static void printArray(double[][] array)

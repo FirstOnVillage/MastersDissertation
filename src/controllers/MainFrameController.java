@@ -1,4 +1,4 @@
-package sample;
+package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,6 +28,9 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.TrainingSetScore;
 import org.encog.neural.networks.training.anneal.NeuralSimulatedAnnealing;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import otherClasses.Utilit;
+import otherClasses.Converter;
+import otherClasses.MySQLConnect;
 import tableModel.BatchTableModel;
 import tableModel.DataTrainingSetTableModel;
 
@@ -43,7 +46,7 @@ import java.util.ResourceBundle;
 
 public class MainFrameController implements Initializable
 {
-    private BasicNetwork network;
+    private BasicNetwork network = new BasicNetwork();
     public static String currentUser;
     private int batchSelRow;
     private int dtsSelRow;
@@ -109,7 +112,9 @@ public class MainFrameController implements Initializable
     @FXML
     private ComboBox availableBatchNameComboBox;
     @FXML
-    private Button testButton;
+    private Button learnButton;
+    @FXML
+    private Button computeButton;
     @FXML
     private Rectangle showColorRectangle;
 
@@ -142,45 +147,50 @@ public class MainFrameController implements Initializable
     }
 
     @FXML
-    private void testButtonAction(ActionEvent actionEvent)
+    private void learnButtonAction(ActionEvent actionEvent)
     {
         // create a neural network, without using a factory
-        network = new BasicNetwork();
         network.addLayer(new BasicLayer(null,true,3));
         network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
         network.addLayer(new BasicLayer(new ActivationSigmoid(),true, Integer.valueOf(secondHiddenLayerTextField.getText())));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(),false,2));
+        network.addLayer(new BasicLayer(new ActivationSigmoid(),false,
+                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
         network.getStructure().finalizeStructure();
         network.reset();
 
         MLDataSet trainingSet = new BasicMLDataSet(
-                Data.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
-                Data.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+                Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
+                Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
 
-        // train the neural network
-        /*final ResilientPropagation train = new ResilientPropagation(network, trainingSet);
-
-        int epoch = 1;
-
-        do {
-            train.iteration();
-            System.out.println("Epoch #" + epoch + " Error:" + train.getError());
-            epoch++;
-        } while(train.getError() > Double.valueOf(errorTextField.getText().replace(",", ".")));
-        train.finishTraining();*/
-        trainNetwork("Multilayer perceptron", network, trainingSet);
-
-        logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС");
-
+        logTextArea.clear();
+        logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
+        Thread trainThread = new Thread(() -> {
+            computeButton.setDisable(true);
+            learnButton.setDisable(true);
+            trainNetwork("Multilayer perceptron", network, trainingSet);
+            logTextArea.clear();
+            logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
+                    availableBatchNameComboBox.getValue().toString() + ")");
+        });
+        trainThread.start();
+        try
+        {
+            trainThread.join();
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
         for(MLDataPair pair: trainingSet ) {
             final MLData output = network.compute(pair.getInput());
             logTextArea.setText(logTextArea.getText() + "\n\n" + pair.getInput().getData(0) + ", " + pair.getInput().getData(1) + ", " + pair.getInput().getData(2)
                     + "\nactual=" + output.getData(0) + ", " + output.getData(1)
                     + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
         }
-        testButton.setDisable(true);
-//        Data.printArray(Data.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
-//        Data.printArray(Data.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+        computeButton.setDisable(false);
+        learnButton.setDisable(false);
+        JOptionPane.showMessageDialog(null, dtsIsConformity());
+//        Utilit.printArray(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+//        Utilit.printArray(Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
     }
 
     @FXML
@@ -192,9 +202,9 @@ public class MainFrameController implements Initializable
                 Double.valueOf(idealBTextField.getText().replace(",", "."))};
         double output[] = {0.0, 0.0};
         network.compute(input, output);
-        if (Labrgb.revertLABToRGB(input[0], input[1], input[2]))
+        if (Converter.revertLABToRGB(input[0], input[1], input[2]))
         {
-            showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Labrgb.colR, Labrgb.colG, Labrgb.colB));
+            showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
         }
         logTextArea.setText(logTextArea.getText() + "\n\nКонцентрация красителей: ");
         for(double element: output )
@@ -347,7 +357,8 @@ public class MainFrameController implements Initializable
     }
 
     public static double trainNetwork(final String what,
-                                      final BasicNetwork network, final MLDataSet trainingSet) {
+                                      final BasicNetwork network, final MLDataSet trainingSet)
+    {
         // train the neural network
         CalculateScore score = new TrainingSetScore(trainingSet);
         final MLTrain trainAlt = new NeuralSimulatedAnnealing(
@@ -366,6 +377,13 @@ public class MainFrameController implements Initializable
             System.out.println("Training " + what + ", Epoch #" + epoch
                     + " Error:" + trainMain.getError());
             epoch++;
+//            try
+//            {
+//                Thread.sleep(5);
+//            } catch (InterruptedException e)
+//            {
+//                e.printStackTrace();
+//            }
         }
         return trainMain.getError();
     }
@@ -712,6 +730,19 @@ public class MainFrameController implements Initializable
         list.add(2);
         list.add(3);
         return list;
+    }
+
+    private boolean dtsIsConformity()
+    {
+//        if (dyeNumberComboBox.getValue().toString().equals(
+//                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())))
+//            return false;
+        if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
+                Double.valueOf(lValueTextField.getText()),
+                Double.valueOf(aValueTextField.getText()),
+                Double.valueOf(bValueTextField.getText())))
+            return false;
+        return true;
     }
 
     private int currentUserIdSearch()
