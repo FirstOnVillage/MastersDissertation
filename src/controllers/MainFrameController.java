@@ -160,7 +160,8 @@ public class MainFrameController implements Initializable
 
         MLDataSet trainingSet = new BasicMLDataSet(
                 Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
-                Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+                Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(),
+                        Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
 
         logTextArea.clear();
         logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
@@ -189,6 +190,7 @@ public class MainFrameController implements Initializable
         computeButton.setDisable(false);
         learnButton.setDisable(false);
         JOptionPane.showMessageDialog(null, dtsIsConformity());
+//        dtsIsConformity();
 //        Utilit.printArray(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
 //        Utilit.printArray(Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
     }
@@ -734,14 +736,16 @@ public class MainFrameController implements Initializable
 
     private boolean dtsIsConformity()
     {
-//        if (dyeNumberComboBox.getValue().toString().equals(
-//                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())))
-//            return false;
-        if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
-                Double.valueOf(lValueTextField.getText()),
-                Double.valueOf(aValueTextField.getText()),
-                Double.valueOf(bValueTextField.getText())))
+        if (dyeNumberComboBox.getValue().toString().equals(
+                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())))
             return false;
+        if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
+                Double.valueOf(idealLTextField.getText()),
+                Double.valueOf(idealATextField.getText()),
+                Double.valueOf(idealBTextField.getText())))
+        {
+            return false;
+        }
         return true;
     }
 

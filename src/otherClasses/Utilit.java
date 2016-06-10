@@ -96,10 +96,10 @@ public class Utilit
         return array;
     }
 
-    public static double[][] getDyeValuesFromDB(String batchName)
+    public static double[][] getDyeValuesFromDB(String batchName, int dyeCount)
     {
         int count = getCountBatchElements(batchName);
-        double[][] array = new double[count][2];
+        double[][] array = new double[count][dyeCount];
         Statement dtsSt;
         ResultSet dtsRs;
         int i = 0;
@@ -113,9 +113,9 @@ public class Utilit
                 Integer firstDyeId = dtsRs.getInt("firstDye");
                 Integer secondDyeId = dtsRs.getInt("secondDye");
                 Integer thirdDyeId = dtsRs.getInt("thirdDye");
-                array[i][0] = Double.valueOf(getValuePerIdFromDB("firstdye", "idFirstDye", firstDyeId.toString(), "concValue").toString());
-                array[i][1] = Double.valueOf(getValuePerIdFromDB("seconddye", "idSecondDye", secondDyeId.toString(), "concValue").toString());
-                //array[i][2] = Double.valueOf(getValuePerIdFromDB("thirddye", "idThirdDye", thirdDyeId.toString(), "concValue").toString());
+                if (dyeCount >= 1) array[i][0] = Double.valueOf(getValuePerIdFromDB("firstdye", "idFirstDye", firstDyeId.toString(), "concValue").toString());
+                if (dyeCount >= 2) array[i][1] = Double.valueOf(getValuePerIdFromDB("seconddye", "idSecondDye", secondDyeId.toString(), "concValue").toString());
+                if (dyeCount >= 3) array[i][2] = Double.valueOf(getValuePerIdFromDB("thirddye", "idThirdDye", thirdDyeId.toString(), "concValue").toString());
                 i++;
             }
         } catch (SQLException e)
@@ -243,9 +243,9 @@ public class Utilit
         {
             for (int j = 0; j < array[i].length; j++)
             {
-                if ((!rangeTest(array[i][0], lIdealValue, 0.8)) ||
-                        (!rangeTest(array[i][1], aIdealValue, 0.8)) ||
-                        (!rangeTest(array[i][2], bIdealValue, 0.8))) return false;
+                if ((!rangeTest(array[i][0], lIdealValue, 0.7)) ||
+                        (!rangeTest(array[i][1], aIdealValue, 0.7)) ||
+                        (!rangeTest(array[i][2], bIdealValue, 0.7))) return false;
             }
         }
         return true;

@@ -47,7 +47,7 @@
                                                 <Button fx:id="computeButton" layoutX="243.0" layoutY="210.0" mnemonicParsing="false" disable="true" onAction="#computeButtonAction" text="Подобрать" />
                                                 <Label layoutX="48.0" layoutY="82.0" text="a" />
                                                 <Label layoutX="48.0" layoutY="114.0" text="b" />
-                                                <TextField fx:id="idealATextField" layoutX="76.0" layoutY="78.0" prefWidth="63.0" promptText="a" text="20" />
+                                                <TextField fx:id="idealATextField" layoutX="76.0" layoutY="78.0" prefWidth="63.0" promptText="a" text="25" />
                                                 <TextField fx:id="idealBTextField" layoutX="76.0" layoutY="110.0" prefWidth="63.0" promptText="b" text="40" />
                                                       <TextField fx:id="idealLTextField" layoutX="75.0" layoutY="47.0" prefHeight="25.0" prefWidth="65.0" promptText="L" text="70" />
                                                       <Label layoutX="49.0" layoutY="51.0" text="L" />
