@@ -1,6 +1,9 @@
 package controllers;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -9,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -51,6 +55,10 @@ public class MainFrameController implements Initializable
     private int batchSelRow;
     private int dtsSelRow;
 
+    @FXML
+    private MenuItem learnMenuItem;
+    @FXML
+    private MenuItem computeMenuItem;
     @FXML
     private TableView<BatchTableModel> batchTable;
     @FXML
@@ -108,13 +116,23 @@ public class MainFrameController implements Initializable
     @FXML
     private TextField bValueTextField;
     @FXML
+    private TextField allowableColorDifferenceTextField;
+    @FXML
+    private Slider idealLSlider;
+    @FXML
+    private Slider idealASlider;
+    @FXML
+    private Slider idealBSlider;
+    @FXML
+    private Slider allowableColorDifferenceSlider;
+    @FXML
     private ComboBox dyeNumberComboBox;
     @FXML
     private ComboBox availableBatchNameComboBox;
-    @FXML
-    private Button learnButton;
-    @FXML
-    private Button computeButton;
+//    @FXML
+//    private Button learnButton;
+//    @FXML
+//    private Button computeButton;
     @FXML
     private Rectangle showColorRectangle;
     @FXML
@@ -149,7 +167,7 @@ public class MainFrameController implements Initializable
     }
 
     @FXML
-    private void learnButtonAction(ActionEvent actionEvent)
+    private void learnMenuItemAction()
     {
         // create a neural network, without using a factory
         network.addLayer(new BasicLayer(null,true,3));
@@ -168,8 +186,8 @@ public class MainFrameController implements Initializable
         logTextArea.clear();
         logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
         Thread trainThread = new Thread(() -> {
-            computeButton.setDisable(true);
-            learnButton.setDisable(true);
+            computeMenuItem.setDisable(true);
+            learnMenuItem.setDisable(true);
             trainNetwork("Multilayer perceptron", network, trainingSet);
             logTextArea.clear();
             logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
@@ -189,16 +207,67 @@ public class MainFrameController implements Initializable
                     + "\nactual=" + output.getData(0) + ", " + output.getData(1)
                     + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
         }
-        computeButton.setDisable(false);
-        learnButton.setDisable(false);
-        JOptionPane.showMessageDialog(null, dtsIsConformity());
+        computeMenuItem.setDisable(false);
+        learnMenuItem.setDisable(false);
+        JOptionPane.showMessageDialog(null, "Conformity: " + dtsIsConformity() +
+                "\nMax differnce: " +
+                String.format("%.2f", Utilit.maxDifference));
 //        dtsIsConformity();
 //        Utilit.printArray(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
 //        Utilit.printArray(Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
     }
 
+//    @FXML
+//    private void learnButtonAction(ActionEvent actionEvent)
+//    {
+//        // create a neural network, without using a factory
+//        network.addLayer(new BasicLayer(null,true,3));
+//        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
+//        network.addLayer(new BasicLayer(new ActivationSigmoid(),true, Integer.valueOf(secondHiddenLayerTextField.getText())));
+//        network.addLayer(new BasicLayer(new ActivationSigmoid(),false,
+//                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+//        network.getStructure().finalizeStructure();
+//        network.reset();
+//
+//        MLDataSet trainingSet = new BasicMLDataSet(
+//                Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
+//                Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(),
+//                        Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+//
+//        logTextArea.clear();
+//        logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
+//        Thread trainThread = new Thread(() -> {
+//            computeButton.setDisable(true);
+//            learnButton.setDisable(true);
+//            trainNetwork("Multilayer perceptron", network, trainingSet);
+//            logTextArea.clear();
+//            logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
+//                    availableBatchNameComboBox.getValue().toString() + ")");
+//        });
+//        trainThread.start();
+//        try
+//        {
+//            trainThread.join();
+//        } catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        for(MLDataPair pair: trainingSet ) {
+//            final MLData output = network.compute(pair.getInput());
+//            logTextArea.setText(logTextArea.getText() + "\n\n" + pair.getInput().getData(0) + ", " + pair.getInput().getData(1) + ", " + pair.getInput().getData(2)
+//                    + "\nactual=" + output.getData(0) + ", " + output.getData(1)
+//                    + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
+//        }
+//        computeButton.setDisable(false);
+//        learnButton.setDisable(false);
+//        JOptionPane.showMessageDialog(null, dtsIsConformity());
+////        dtsIsConformity();
+////        Utilit.printArray(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+////        Utilit.printArray(Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+//    }
+
     @FXML
-    private void computeButtonAction(ActionEvent actionEvent)
+    private void computeMenuItemAction()
     {
         double input[] = {Double.valueOf(
                 idealLTextField.getText().replace(",", ".")),
@@ -215,6 +284,25 @@ public class MainFrameController implements Initializable
             logTextArea.setText(logTextArea.getText() + "\n" + element);
         logTextArea.end();
     }
+
+//    @FXML
+//    private void computeButtonAction(ActionEvent actionEvent)
+//    {
+//        double input[] = {Double.valueOf(
+//                idealLTextField.getText().replace(",", ".")),
+//                Double.valueOf(idealATextField.getText().replace(",", ".")),
+//                Double.valueOf(idealBTextField.getText().replace(",", "."))};
+//        double output[] = {0.0, 0.0};
+//        network.compute(input, output);
+//        if (Converter.revertLABToRGB(input[0], input[1], input[2]))
+//        {
+//            showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
+//        }
+//        logTextArea.setText(logTextArea.getText() + "\n\nКонцентрация красителей: ");
+//        for(double element: output )
+//            logTextArea.setText(logTextArea.getText() + "\n" + element);
+//        logTextArea.end();
+//    }
 
     @FXML
     private void addBatchTableItemButtonAction(ActionEvent actionEvent)
@@ -440,6 +528,51 @@ public class MainFrameController implements Initializable
         availableBatchNameComboBox.getItems().setAll(getBatchNames());
         dyeNumberComboBox.getSelectionModel().select(1);
         availableBatchNameComboBox.getSelectionModel().select(0);
+
+        idealLTextField.setText(String.format("%.0f", idealLSlider.getValue()));
+        idealATextField.setText(String.format("%.0f", idealASlider.getValue()));
+        idealBTextField.setText(String.format("%.0f", idealBSlider.getValue()));
+        idealBTextField.setText(String.format("%.0f", idealBSlider.getValue()));
+        allowableColorDifferenceTextField.setText(String.format("%.2f", allowableColorDifferenceSlider.getValue()));
+        idealLSlider.valueProperty().addListener((ov, old_val, new_val) -> {
+            idealLTextField.setText(String.format("%.0f", new_val));
+            if (Converter.revertLABToRGB(Double.valueOf(new_val.toString()),
+                    Double.valueOf(idealATextField.getText()),
+                    Double.valueOf(idealBTextField.getText())))
+            {
+                showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
+            }
+        });
+        idealASlider.valueProperty().addListener((ov, old_val, new_val) -> {
+            idealATextField.setText(String.format("%.0f", new_val));
+            if (Converter.revertLABToRGB(Double.valueOf(idealLTextField.getText()),
+                    Double.valueOf(new_val.toString()),
+                    Double.valueOf(idealBTextField.getText())))
+            {
+                showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
+            }
+        });
+        idealBSlider.valueProperty().addListener((ov, old_val, new_val) -> {
+            idealBTextField.setText(String.format("%.0f", new_val));
+            if (Converter.revertLABToRGB(Double.valueOf(idealLTextField.getText()),
+                    Double.valueOf(idealATextField.getText()),
+                    Double.valueOf(new_val.toString())))
+            {
+                showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
+            }
+        });
+
+        allowableColorDifferenceSlider.valueProperty().addListener((ov, old_val, new_val) -> {
+            allowableColorDifferenceTextField.setText(String.format("%.2f", new_val));
+        });
+
+
+        if (Converter.revertLABToRGB(Double.valueOf(idealLTextField.getText()),
+                Double.valueOf(idealATextField.getText()),
+                Double.valueOf(idealBTextField.getText())))
+        {
+            showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
+        }
 
         if (currentUser.equals("Admin"))
         {
@@ -749,7 +882,8 @@ public class MainFrameController implements Initializable
         if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
                 Double.valueOf(idealLTextField.getText()),
                 Double.valueOf(idealATextField.getText()),
-                Double.valueOf(idealBTextField.getText())))
+                Double.valueOf(idealBTextField.getText()),
+                Double.valueOf(allowableColorDifferenceTextField.getText().replace(",", "."))))
         {
             return false;
         }

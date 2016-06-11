@@ -63,6 +63,8 @@ public class Utilit
             { 0.198, 0.053 }
     };
 
+    public static double maxDifference = 0;
+
     public static double[][] getColorCoordValuesFromDB(String batchName)
     {
         int count = getCountBatchElements(batchName);
@@ -235,33 +237,56 @@ public class Utilit
         return false;
     }
 
-    public static boolean rgbRangeIsCorrently(String batchName, double lIdealValue, double aIdealValue, double bIdealValue)
+    public static boolean rgbRangeIsCorrently(String batchName,
+                                              double lIdealValue,
+                                              double aIdealValue,
+                                              double bIdealValue,
+                                              double allowDifferent)
     {
-
+        double currentDifference;
         double[][] array = getColorCoordValuesFromDB(batchName);
+
+        maxDifference = 0;
         for(int i = 0; i < array.length; i++)
         {
             for (int j = 0; j < array[i].length; j++)
             {
-                if ((!rangeTest(array[i][0], lIdealValue, 0.7)) ||
-                        (!rangeTest(array[i][1], aIdealValue, 0.7)) ||
-                        (!rangeTest(array[i][2], bIdealValue, 0.7))) return false;
+                currentDifference = differenceE(
+                        lIdealValue,
+                        aIdealValue,
+                        bIdealValue,
+                        array[i][0],
+                        array[i][1],
+                        array[i][2]);
+                if (currentDifference > maxDifference) maxDifference = currentDifference;
+                if (currentDifference > allowDifferent)
+                {
+                    return false;
+                }
+//                if ((!rangeTest(array[i][0], lIdealValue, 0.7)) ||
+//                        (!rangeTest(array[i][1], aIdealValue, 0.7)) ||
+//                        (!rangeTest(array[i][2], bIdealValue, 0.7))) return false;
             }
         }
         return true;
     }
 
-    public static boolean rangeTest(double firstNumber, double secondNumber, double range)
+//    public static boolean rangeTest(double firstNumber, double secondNumber, double range)
+//    {
+//        if (firstNumber < secondNumber)
+//        {
+//            if ((firstNumber / secondNumber) < range) return false;
+//        }
+//        else
+//        {
+//            if ((secondNumber / firstNumber) < range) return false;
+//        }
+//        return true;
+//    }
+
+    private static double differenceE(double etalonL, double etalonA, double etalonB, double testL, double testA, double testB)
     {
-        if (firstNumber < secondNumber)
-        {
-            if ((firstNumber / secondNumber) < range) return false;
-        }
-        else
-        {
-            if ((secondNumber / firstNumber) < range) return false;
-        }
-        return true;
+        return Math.sqrt((Math.pow(etalonL - testL, 2)) + (Math.pow(etalonA - testA, 2)) + (Math.pow(etalonB - testB, 2)));
     }
 
     public static void printArray(double[][] array)
