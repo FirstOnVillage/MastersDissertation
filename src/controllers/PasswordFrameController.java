@@ -43,8 +43,7 @@ public class PasswordFrameController implements Initializable
             }
             if (passwordField.getText().equals(password))
             {
-                if (nameTextField.getText().equals("Admin"))
-                    pwIsCorrect = true;
+                pwIsCorrect = true;
                 MainFrameController.currentUser = nameTextField.getText();
                 Stage stage = (Stage) checkButton.getScene().getWindow();
                 stage.close();

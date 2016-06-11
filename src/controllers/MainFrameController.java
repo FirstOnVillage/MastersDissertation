@@ -117,6 +117,8 @@ public class MainFrameController implements Initializable
     private Button computeButton;
     @FXML
     private Rectangle showColorRectangle;
+    @FXML
+    private Tab editDBTab;
 
     @FXML
     private void exitMenuItemAction() throws SQLException
@@ -438,6 +440,11 @@ public class MainFrameController implements Initializable
         availableBatchNameComboBox.getItems().setAll(getBatchNames());
         dyeNumberComboBox.getSelectionModel().select(1);
         availableBatchNameComboBox.getSelectionModel().select(0);
+
+        if (currentUser.equals("Admin"))
+        {
+            editDBTab.setDisable(false);
+        }
     }
 
     private List<BatchTableModel> getBatchTableInfo()
@@ -736,8 +743,8 @@ public class MainFrameController implements Initializable
 
     private boolean dtsIsConformity()
     {
-        if (dyeNumberComboBox.getValue().toString().equals(
-                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())))
+        if (Integer.valueOf(dyeNumberComboBox.getValue().toString()) !=
+                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString()))
             return false;
         if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
                 Double.valueOf(idealLTextField.getText()),
