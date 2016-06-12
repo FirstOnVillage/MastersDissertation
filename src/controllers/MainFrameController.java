@@ -169,52 +169,132 @@ public class MainFrameController implements Initializable
     @FXML
     private void learnMenuItemAction()
     {
-        // create a neural network, without using a factory
-        network.addLayer(new BasicLayer(null,true,3));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(),true, Integer.valueOf(secondHiddenLayerTextField.getText())));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(),false,
-                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
-        network.getStructure().finalizeStructure();
-        network.reset();
+        if (dtsIsConformity(availableBatchNameComboBox.getValue().toString()))
+        {
+            // create a neural network, without using a factory
+            network.addLayer(new BasicLayer(null, true, 3));
+            network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
+            network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(secondHiddenLayerTextField.getText())));
+            network.addLayer(new BasicLayer(new ActivationSigmoid(), false, Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+            network.getStructure().finalizeStructure();
+            network.reset();
 
-        MLDataSet trainingSet = new BasicMLDataSet(
-                Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()),
-                Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(),
-                        Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+            MLDataSet trainingSet = new BasicMLDataSet(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()), Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(), Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
 
-        logTextArea.clear();
-        logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
-        Thread trainThread = new Thread(() -> {
-            computeMenuItem.setDisable(true);
-            learnMenuItem.setDisable(true);
-            trainNetwork("Multilayer perceptron", network, trainingSet);
             logTextArea.clear();
-            logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
-                    availableBatchNameComboBox.getValue().toString() + ")");
-        });
-        trainThread.start();
+            logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
+            Thread trainThread = new Thread(() -> {
+                computeMenuItem.setDisable(true);
+                learnMenuItem.setDisable(true);
+                trainNetwork("Multilayer perceptron", network, trainingSet);
+                logTextArea.clear();
+                logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
+                        availableBatchNameComboBox.getValue().toString() + ")");
+            });
+            trainThread.start();
+            try
+            {
+                trainThread.join();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+            for (MLDataPair pair : trainingSet)
+            {
+                final MLData output = network.compute(pair.getInput());
+                logTextArea.setText(logTextArea.getText() + "\n\n" + pair.getInput().getData(0) + ", " + pair.getInput().getData(1) + ", " + pair.getInput().getData(2) + "\nactual=" + String.format("%.3f", output.getData(0)).replace(",", ".") + ", " + String.format("%.3f", output.getData(1)).replace(",", ".") + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
+            }
+            computeMenuItem.setDisable(false);
+            learnMenuItem.setDisable(false);
+        }
+        else
+        {
+            logTextArea.clear();
+            computeMenuItem.setDisable(true);
+            logTextArea.setText("Выбранная обучающая партия не соответствует заданным данным!");
+            if (!colorCoordIsConformity(availableBatchNameComboBox.getValue().toString()))
+            {
+                logTextArea.setText(logTextArea.getText() +
+                        "\n\nСлишком большое цветовое различие.\n" +
+                        "dE = " + String.format("%.2f", Utilit.maxDifference) +
+                        "\nУменьшите значение допустимого dE или проведите поиск " +
+                        "среди всех доступных партий и выберите корретнный набор данных.");
+            }
+
+            if (!dyeNumberIsConformity(availableBatchNameComboBox.getValue().toString()))
+            {
+                logTextArea.setText(logTextArea.getText() +
+                        "\n\nРазличается количество красителей.\n" +
+                        "Заданное количество: " + dyeNumberComboBox.getValue().toString() +
+                        "\nКоличество красителей в выбранной партии: " +
+                        Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString()) +
+                        "\nВыберите корректное количество красителей или проведите поиск " +
+                        "среди всех доступных партий и выберите корретнный набор данных.");
+            }
+        }
+    }
+
+    @FXML
+    public void conformityMenuItemAction()
+    {
+        String batchName;
+        String fullConformityBatchName = "";
+        String dyeNumberConformityBatchName = "";
+        String colorCoordConformityBatchName = "";
+        Statement st;
+        ResultSet rs;
         try
         {
-            trainThread.join();
-        } catch (InterruptedException e)
+            st = MySQLConnect.getConnection().createStatement();
+            String recordQuery = "Select * from batch";
+            rs = st.executeQuery(recordQuery);
+            while (rs.next())
+            {
+                batchName = rs.getString("name");
+                if (dtsIsConformity(batchName))
+                {
+                    fullConformityBatchName += batchName + "\n";
+                }
+                if (dyeNumberIsConformity(batchName))
+                {
+                    dyeNumberConformityBatchName += batchName + "\n";
+                }
+                if (colorCoordIsConformity(batchName))
+                {
+                    colorCoordConformityBatchName += batchName + "\n";
+                }
+            }
+        } catch (SQLException e)
         {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e);
         }
-        for(MLDataPair pair: trainingSet ) {
-            final MLData output = network.compute(pair.getInput());
-            logTextArea.setText(logTextArea.getText() + "\n\n" + pair.getInput().getData(0) + ", " + pair.getInput().getData(1) + ", " + pair.getInput().getData(2)
-                    + "\nactual=" + output.getData(0) + ", " + output.getData(1)
-                    + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
+        logTextArea.clear();
+        if (!fullConformityBatchName.isEmpty())
+        {
+            logTextArea.setText(logTextArea.getText() + "Доступные соотвествующие партии: \n" + fullConformityBatchName);
         }
-        computeMenuItem.setDisable(false);
-        learnMenuItem.setDisable(false);
-        JOptionPane.showMessageDialog(null, "Conformity: " + dtsIsConformity() +
-                "\nMax differnce: " +
-                String.format("%.2f", Utilit.maxDifference));
-//        dtsIsConformity();
-//        Utilit.printArray(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()));
-//        Utilit.printArray(Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString()));
+        else
+            if (fullConformityBatchName.isEmpty() &&
+                    dyeNumberConformityBatchName.isEmpty() &&
+                    colorCoordConformityBatchName.isEmpty())
+            {
+                logTextArea.setText(logTextArea.getText() + "Нет доступных соотвествующих партий.");
+            }
+            else
+            {
+                if (!colorCoordConformityBatchName.isEmpty())
+                {
+                    logTextArea.setText(logTextArea.getText() +
+                            "Следующие партии не выходят за пределы цветового различия: \n" +
+                            colorCoordConformityBatchName);
+                }
+                if (!dyeNumberConformityBatchName.isEmpty())
+                {
+                    logTextArea.setText(logTextArea.getText() +
+                            "Количество красителей следующих партий совпадает с заданным: \n" +
+                            dyeNumberConformityBatchName);
+                }
+            }
     }
 
 //    @FXML
@@ -281,7 +361,7 @@ public class MainFrameController implements Initializable
         }
         logTextArea.setText(logTextArea.getText() + "\n\nКонцентрация красителей: ");
         for(double element: output )
-            logTextArea.setText(logTextArea.getText() + "\n" + element);
+            logTextArea.setText(logTextArea.getText() + "\n" + String.format("%.3f", element).replace(",", "."));
         logTextArea.end();
     }
 
@@ -874,12 +954,26 @@ public class MainFrameController implements Initializable
         return list;
     }
 
-    private boolean dtsIsConformity()
+    private boolean dtsIsConformity(String batchName)
+    {
+        if (dyeNumberIsConformity(batchName) && colorCoordIsConformity(batchName))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean dyeNumberIsConformity(String batchName)
     {
         if (Integer.valueOf(dyeNumberComboBox.getValue().toString()) !=
-                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString()))
+                Utilit.getNumberOfDyes(batchName))
             return false;
-        if (!Utilit.rgbRangeIsCorrently(availableBatchNameComboBox.getValue().toString(),
+        return true;
+    }
+
+    private boolean colorCoordIsConformity(String batchName)
+    {
+        if (!Utilit.rgbRangeIsCorrently(batchName,
                 Double.valueOf(idealLTextField.getText()),
                 Double.valueOf(idealATextField.getText()),
                 Double.valueOf(idealBTextField.getText()),

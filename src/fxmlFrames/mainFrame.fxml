@@ -18,6 +18,8 @@
                     <items>
                         <MenuItem fx:id="learnMenuItem" mnemonicParsing="false" onAction="#learnMenuItemAction" text="Провести обучение" />
                         <MenuItem fx:id="computeMenuItem" disable="true" mnemonicParsing="false" onAction="#computeMenuItemAction" text="Рассчитать концентрацию красителей" />
+                        <MenuItem mnemonicParsing="false" onAction="#conformityMenuItemAction" text="Поиск соотвествий среди всех обучающих партий" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" text="Просмотреть log-файл" />
                         <MenuItem mnemonicParsing="false" onAction="#exitMenuItemAction" text="Выход" />
                     </items>
@@ -70,25 +72,25 @@
                                                 <Label layoutX="35.0" layoutY="54.0" text="Кол-во нейронов второго скрытого слоя" />
                                                 <TextField fx:id="firstHiddenLayerTextField" layoutX="296.0" layoutY="19.0" prefHeight="25.0" prefWidth="65.0" promptText="1 слой" text="6" />
                                                 <TextField fx:id="secondHiddenLayerTextField" layoutX="296.0" layoutY="50.0" prefHeight="25.0" prefWidth="65.0" promptText="2 слой" text="12" />
-                                                <Label layoutX="34.0" layoutY="85.0" text="Обучающая партия" />
-                                                <ComboBox fx:id="availableBatchNameComboBox" layoutX="243.0" layoutY="81.0" prefHeight="25.0" prefWidth="123.0" promptText="Партия" />
-                                                <Label layoutX="35.0" layoutY="122.0" text="Количество красителей" />
-                                                <ComboBox fx:id="dyeNumberComboBox" layoutX="298.0" layoutY="118.0" prefHeight="25.0" prefWidth="62.0" />
-                                                <Separator layoutX="33.0" layoutY="75.0" prefWidth="300.0">
+                                                <Label layoutX="35.0" layoutY="101.0" text="Обучающая партия" />
+                                                <ComboBox fx:id="availableBatchNameComboBox" layoutX="244.0" layoutY="97.0" prefHeight="25.0" prefWidth="123.0" promptText="Партия" />
+                                                <Label layoutX="36.0" layoutY="138.0" text="Количество красителей" />
+                                                <ComboBox fx:id="dyeNumberComboBox" layoutX="298.0" layoutY="134.0" prefHeight="25.0" prefWidth="62.0" />
+                                                <Separator layoutX="38.0" layoutY="85.0" prefWidth="310.0">
                                                    <padding>
                                                       <Insets left="5.0" right="5.0" />
                                                    </padding>
                                                 </Separator>
-                                                <Label layoutX="35.0" layoutY="157.0" text="Допустимое цветовое различие, dE" />
-                                                <Slider fx:id="allowableColorDifferenceSlider" layoutX="35.0" layoutY="186.0" max="50.0" prefHeight="14.0" prefWidth="249.0" value="20.0" />
-                                                <TextField fx:id="allowableColorDifferenceTextField" editable="false" layoutX="296.0" layoutY="181.0" prefHeight="25.0" prefWidth="65.0" promptText="dE" />
+                                                <Label layoutX="36.0" layoutY="173.0" text="Допустимое цветовое различие, dE" />
+                                                <Slider fx:id="allowableColorDifferenceSlider" layoutX="36.0" layoutY="202.0" max="50.0" prefHeight="14.0" prefWidth="249.0" value="20.0" />
+                                                <TextField fx:id="allowableColorDifferenceTextField" editable="false" layoutX="296.0" layoutY="197.0" prefHeight="25.0" prefWidth="65.0" promptText="dE" />
                                              </children>
                                           </Pane>
                                   </children>
                                 </Pane>
                                  </left>
                                  <right>
-                                <TextArea id="logTextField" fx:id="logTextArea" prefHeight="426.0" prefWidth="348.0" wrapText="true" BorderPane.alignment="CENTER" />
+                                <TextArea id="logTextField" fx:id="logTextArea" editable="false" prefHeight="426.0" prefWidth="348.0" wrapText="true" BorderPane.alignment="CENTER" />
                                  </right>
                               </BorderPane>
                            </children>
