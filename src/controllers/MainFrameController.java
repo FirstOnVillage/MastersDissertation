@@ -202,7 +202,17 @@ public class MainFrameController implements Initializable
             for (MLDataPair pair : trainingSet)
             {
                 final MLData output = network.compute(pair.getInput());
-                logTextArea.setText(logTextArea.getText() + "\n\n" + pair.getInput().getData(0) + ", " + pair.getInput().getData(1) + ", " + pair.getInput().getData(2) + "\nactual=" + String.format("%.3f", output.getData(0)).replace(",", ".") + ", " + String.format("%.3f", output.getData(1)).replace(",", ".") + "\nideal=" + pair.getIdeal().getData(0) + ", " + pair.getIdeal().getData(1));
+                logTextArea.setText(logTextArea.getText() + "\n\nЦветовые координаты\nL = " + pair.getInput().getData(0) +
+                        ", a = " + pair.getInput().getData(1) +
+                        ", b = " + pair.getInput().getData(2) +
+                        "\n\nРассчитаные значения:\nКонцентрация 1 красителя = " +
+                        String.format("%.3f", output.getData(0)).replace(",", ".") +
+                        "\nКонцентрация 2 красителя = " +
+                        String.format("%.3f", output.getData(1)).replace(",", ".") +
+                        "\n\nИдеальные значения:\nКонцентрация 1 красителя = " +
+                        pair.getIdeal().getData(0) +
+                        "\nКонцентрация 2 красителя = " +
+                        pair.getIdeal().getData(1) + "\n\n---------------");
             }
             computeMenuItem.setDisable(false);
             learnMenuItem.setDisable(false);
@@ -349,6 +359,7 @@ public class MainFrameController implements Initializable
     @FXML
     private void computeMenuItemAction()
     {
+        int count = 1;
         double input[] = {Double.valueOf(
                 idealLTextField.getText().replace(",", ".")),
                 Double.valueOf(idealATextField.getText().replace(",", ".")),
@@ -359,9 +370,18 @@ public class MainFrameController implements Initializable
         {
             showColorRectangle.setFill(javafx.scene.paint.Color.rgb(Converter.colR, Converter.colG, Converter.colB));
         }
-        logTextArea.setText(logTextArea.getText() + "\n\nКонцентрация красителей: ");
+        logTextArea.setText(logTextArea.getText() +
+                "\n\nРезультаты подбора рецептуры для заданных цветовых координат\n ");
         for(double element: output )
-            logTextArea.setText(logTextArea.getText() + "\n" + String.format("%.3f", element).replace(",", "."));
+        {
+            logTextArea.setText(logTextArea.getText() +
+                    "\nКонцентрация " +
+                    count +
+                    " красителя = " +
+                    String.format("%.3f", element).replace(",", "."));
+            count++;
+        }
+        logTextArea.setText(logTextArea.getText() + "\n\n---------------");
         logTextArea.end();
     }
 
