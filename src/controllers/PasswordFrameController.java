@@ -52,9 +52,9 @@ public class PasswordFrameController implements Initializable
             {
                 JOptionPane.showMessageDialog(null, "Неверное имя пользователя или пароль!", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 

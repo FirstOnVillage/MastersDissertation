@@ -10,6 +10,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.ScrollEvent;
@@ -39,6 +42,9 @@ import tableModel.BatchTableModel;
 import tableModel.DataTrainingSetTableModel;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
@@ -59,6 +65,8 @@ public class MainFrameController implements Initializable
     private MenuItem learnMenuItem;
     @FXML
     private MenuItem computeMenuItem;
+    @FXML
+    private MenuItem openLogMenuItem;
     @FXML
     private TableView<BatchTableModel> batchTable;
     @FXML
@@ -147,6 +155,25 @@ public class MainFrameController implements Initializable
     }
 
     @FXML
+    private void openLogMenuItemAction()
+    {
+        File file = new File("log.txt"); //для Unix ОС
+        Desktop desktop = null;
+
+        if (Desktop.isDesktopSupported())
+        {
+            desktop = Desktop.getDesktop();
+        }
+        try
+        {
+            desktop.open(file);
+        } catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(null, "Невозможно открыть log-файл.", "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    @FXML
     public void AboutMenuItemAction()
     {
         try
@@ -167,81 +194,90 @@ public class MainFrameController implements Initializable
     }
 
     @FXML
-    private void learnMenuItemAction()
+    private void learnMenuItemAction() throws InterruptedException
     {
-        if (dtsIsConformity(availableBatchNameComboBox.getValue().toString()))
-        {
-            // create a neural network, without using a factory
-            network.addLayer(new BasicLayer(null, true, 3));
-            network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
-            network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(secondHiddenLayerTextField.getText())));
-            network.addLayer(new BasicLayer(new ActivationSigmoid(), false, Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
-            network.getStructure().finalizeStructure();
-            network.reset();
+        Thread trainThread = new Thread(() -> {
+            if (Utilit.checkIntData(firstHiddenLayerTextField.getText()) &&
+                    Utilit.checkIntData(secondHiddenLayerTextField.getText()))
+            {
+                if (dtsIsConformity(availableBatchNameComboBox.getValue().toString()))
+                {
+                    // create a neural network, without using a factory
+                    network.addLayer(new BasicLayer(null, true, 3));
+                    network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(firstHiddenLayerTextField.getText())));
+                    network.addLayer(new BasicLayer(new ActivationSigmoid(), true, Integer.valueOf(secondHiddenLayerTextField.getText())));
+                    network.addLayer(new BasicLayer(new ActivationSigmoid(), false, Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+                    network.getStructure().finalizeStructure();
+                    network.reset();
 
-            MLDataSet trainingSet = new BasicMLDataSet(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()), Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(), Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
+                    MLDataSet trainingSet = new BasicMLDataSet(Utilit.getColorCoordValuesFromDB(availableBatchNameComboBox.getValue().toString()), Utilit.getDyeValuesFromDB(availableBatchNameComboBox.getValue().toString(), Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString())));
 
-            logTextArea.clear();
-            logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
-            Thread trainThread = new Thread(() -> {
-                computeMenuItem.setDisable(true);
-                learnMenuItem.setDisable(true);
-                trainNetwork("Multilayer perceptron", network, trainingSet);
-                logTextArea.clear();
-                logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
-                        availableBatchNameComboBox.getValue().toString() + ")");
-            });
-            trainThread.start();
-            try
-            {
-                trainThread.join();
-            } catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-            for (MLDataPair pair : trainingSet)
-            {
-                final MLData output = network.compute(pair.getInput());
-                logTextArea.setText(logTextArea.getText() + "\n\nЦветовые координаты\nL = " + pair.getInput().getData(0) +
-                        ", a = " + pair.getInput().getData(1) +
-                        ", b = " + pair.getInput().getData(2) +
-                        "\n\nРассчитаные значения:\nКонцентрация 1 красителя = " +
-                        String.format("%.3f", output.getData(0)).replace(",", ".") +
-                        "\nКонцентрация 2 красителя = " +
-                        String.format("%.3f", output.getData(1)).replace(",", ".") +
-                        "\n\nИдеальные значения:\nКонцентрация 1 красителя = " +
-                        pair.getIdeal().getData(0) +
-                        "\nКонцентрация 2 красителя = " +
-                        pair.getIdeal().getData(1) + "\n\n---------------");
-            }
-            computeMenuItem.setDisable(false);
-            learnMenuItem.setDisable(false);
-        }
-        else
-        {
-            logTextArea.clear();
-            computeMenuItem.setDisable(true);
-            logTextArea.setText("Выбранная обучающая партия не соответствует заданным данным!");
-            if (!colorCoordIsConformity(availableBatchNameComboBox.getValue().toString()))
-            {
-                logTextArea.setText(logTextArea.getText() +
-                        "\n\nСлишком большое цветовое различие.\n" +
-                        "dE = " + String.format("%.2f", Utilit.maxDifference) +
-                        "\nУменьшите значение допустимого dE или проведите поиск " +
-                        "среди всех доступных партий и выберите корретнный набор данных.");
-            }
+                    logTextArea.clear();
+                    logTextArea.setText(logTextArea.getText() + "Проводится обученией нейронной сети...");
 
-            if (!dyeNumberIsConformity(availableBatchNameComboBox.getValue().toString()))
+                    computeMenuItem.setDisable(true);
+                    learnMenuItem.setDisable(true);
+                    trainNetwork("Multilayer perceptron", network, trainingSet);
+                    logTextArea.clear();
+                    logTextArea.setText(logTextArea.getText() + "Результаты обучения ИНС (" +
+                            availableBatchNameComboBox.getValue().toString() + ")");
+
+//                try
+//                {
+//                    trainThread.join();
+//                } catch (InterruptedException e)
+//                {
+//                    e.printStackTrace();
+//                }
+                    for (MLDataPair pair : trainingSet)
+                    {
+                        final MLData output = network.compute(pair.getInput());
+                        logTextArea.setText(logTextArea.getText() + "\n\nЦветовые координаты\nL = " + pair.getInput().getData(0) +
+                                ", a = " + pair.getInput().getData(1) +
+                                ", b = " + pair.getInput().getData(2) +
+                                "\n\nРассчитаные значения:\nКонцентрация 1 красителя = " +
+                                String.format("%.3f", output.getData(0)).replace(",", ".") +
+                                "\nКонцентрация 2 красителя = " +
+                                String.format("%.3f", output.getData(1)).replace(",", ".") +
+                                "\n\nИдеальные значения:\nКонцентрация 1 красителя = " +
+                                pair.getIdeal().getData(0) +
+                                "\nКонцентрация 2 красителя = " +
+                                pair.getIdeal().getData(1) + "\n\n---------------");
+                    }
+                    computeMenuItem.setDisable(false);
+                    learnMenuItem.setDisable(false);
+                } else
+                {
+                    logTextArea.clear();
+                    computeMenuItem.setDisable(true);
+                    logTextArea.setText("Выбранная обучающая партия не соответствует заданным данным!");
+                    if (!colorCoordIsConformity(availableBatchNameComboBox.getValue().toString()))
+                    {
+                        logTextArea.setText(logTextArea.getText() +
+                                "\n\nСлишком большое цветовое различие.\n" +
+                                "dE = " + String.format("%.2f", Utilit.maxDifference) +
+                                "\nУменьшите значение допустимого dE или проведите поиск " +
+                                "среди всех доступных партий и выберите корретнный набор данных.");
+                    }
+
+                    if (!dyeNumberIsConformity(availableBatchNameComboBox.getValue().toString()))
+                    {
+                        logTextArea.setText(logTextArea.getText() +
+                                "\n\nРазличается количество красителей.\n" +
+                                "Заданное количество: " + dyeNumberComboBox.getValue().toString() +
+                                "\nКоличество красителей в выбранной партии: " +
+                                Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString()) +
+                                "\nВыберите корректное количество красителей или проведите поиск " +
+                                "среди всех доступных партий и выберите корретнный набор данных.");
+                    }
+                }
+            } else
             {
-                logTextArea.setText(logTextArea.getText() +
-                        "\n\nРазличается количество красителей.\n" +
-                        "Заданное количество: " + dyeNumberComboBox.getValue().toString() +
-                        "\nКоличество красителей в выбранной партии: " +
-                        Utilit.getNumberOfDyes(availableBatchNameComboBox.getValue().toString()) +
-                        "\nВыберите корректное количество красителей или проведите поиск " +
-                        "среди всех доступных партий и выберите корретнный набор данных.");
+                JOptionPane.showMessageDialog(null, "Заданы некорректные данные.", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
-        }
+        });
+        trainThread.start();
+        trainThread.join();
     }
 
     @FXML
@@ -274,9 +310,9 @@ public class MainFrameController implements Initializable
                     colorCoordConformityBatchName += batchName + "\n";
                 }
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         logTextArea.clear();
         if (!fullConformityBatchName.isEmpty())
@@ -418,7 +454,7 @@ public class MainFrameController implements Initializable
             st.executeUpdate(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
@@ -442,7 +478,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
@@ -461,7 +497,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         batchTable.getItems().setAll(getBatchTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
@@ -491,7 +527,7 @@ public class MainFrameController implements Initializable
             st.executeUpdate(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         dtsTable.getItems().setAll(getDtsTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
@@ -541,14 +577,14 @@ public class MainFrameController implements Initializable
             deleteDataFromSelectTableDB("colorCoordinates", "idcolorCoordinates", colCoordId);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         dtsTable.getItems().setAll(getDtsTableInfo());
         batchNameComboBox.getItems().setAll(getBatchNames());
         availableBatchNameComboBox.getItems().setAll(getBatchNames());
     }
 
-    public static double trainNetwork(final String what,
+    private double trainNetwork(final String what,
                                       final BasicNetwork network, final MLDataSet trainingSet)
     {
         // train the neural network
@@ -564,10 +600,11 @@ public class MainFrameController implements Initializable
         trainMain.addStrategy(stop);
 
         int epoch = 0;
-        while (!stop.shouldStop()) {
+        StringBuilder logText = new StringBuilder(new java.util.Date().toString() + "\n");
+        while (!stop.shouldStop())
+        {
             trainMain.iteration();
-            System.out.println("Training " + what + ", Epoch #" + epoch
-                    + " Error:" + trainMain.getError());
+            logText.append("Training " + what + ", Epoch #" + epoch + " Error:" + trainMain.getError() + "\n");
             epoch++;
 //            try
 //            {
@@ -576,6 +613,13 @@ public class MainFrameController implements Initializable
 //            {
 //                e.printStackTrace();
 //            }
+        }
+        try
+        {
+            Utilit.updateLog(logText.toString());
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
         }
         return trainMain.getError();
     }
@@ -705,9 +749,9 @@ public class MainFrameController implements Initializable
                 }
                 list.add(new BatchTableModel(id, name, changedByUser));
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return list;
     }
@@ -752,9 +796,9 @@ public class MainFrameController implements Initializable
                         aValue,
                         bValue));
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return list;
     }
@@ -796,7 +840,7 @@ public class MainFrameController implements Initializable
             }
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return result;
     }
@@ -815,7 +859,7 @@ public class MainFrameController implements Initializable
             }
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return result;
     }
@@ -848,7 +892,7 @@ public class MainFrameController implements Initializable
             }
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return result;
     }
@@ -866,7 +910,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -882,7 +926,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -906,7 +950,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -925,7 +969,7 @@ public class MainFrameController implements Initializable
             }
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return result;
     }
@@ -940,7 +984,7 @@ public class MainFrameController implements Initializable
             st.execute(recordQuery);
         } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -958,9 +1002,9 @@ public class MainFrameController implements Initializable
             {
                 list.add(rs.getString("name"));
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return list;
     }
@@ -1017,9 +1061,9 @@ public class MainFrameController implements Initializable
             {
                 return rs.getInt("idUsers");
             }
-        } catch (SQLException e)
+        } catch (SQLException ex)
         {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, ex, "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
         return 1;
     }

@@ -1,6 +1,7 @@
 package otherClasses;
 
 import javax.swing.*;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -263,30 +264,97 @@ public class Utilit
                 {
                     return false;
                 }
-//                if ((!rangeTest(array[i][0], lIdealValue, 0.7)) ||
-//                        (!rangeTest(array[i][1], aIdealValue, 0.7)) ||
-//                        (!rangeTest(array[i][2], bIdealValue, 0.7))) return false;
             }
         }
         return true;
     }
 
-//    public static boolean rangeTest(double firstNumber, double secondNumber, double range)
-//    {
-//        if (firstNumber < secondNumber)
-//        {
-//            if ((firstNumber / secondNumber) < range) return false;
-//        }
-//        else
-//        {
-//            if ((secondNumber / firstNumber) < range) return false;
-//        }
-//        return true;
-//    }
-
     private static double differenceE(double etalonL, double etalonA, double etalonB, double testL, double testA, double testB)
     {
         return Math.sqrt((Math.pow(etalonL - testL, 2)) + (Math.pow(etalonA - testA, 2)) + (Math.pow(etalonB - testB, 2)));
+    }
+
+    private static void writeToFile(String text)
+    {
+        File logFile = new File("log.txt");
+        try
+        {
+            PrintWriter out = new PrintWriter(logFile.getAbsoluteFile());
+
+            try
+            {
+                out.print(text);
+            }
+            finally
+            {
+                out.close();
+            }
+        } catch(IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String readFromFile() throws FileNotFoundException {
+        StringBuilder sb = new StringBuilder();
+        File file = new File("log.txt");
+        if (!file.exists())
+        {
+            throw new FileNotFoundException(file.getName());
+        }
+        try
+        {
+            BufferedReader in = new BufferedReader(new FileReader( file.getAbsoluteFile()));
+            try
+            {
+                String s;
+                while ((s = in.readLine()) != null)
+                {
+                    sb.append(s);
+                    sb.append("\n");
+                }
+            }
+            finally
+            {
+                in.close();
+            }
+        } catch(IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        return sb.toString();
+    }
+
+    public static void updateLog(String newText) throws FileNotFoundException
+    {
+        File logFile = new File("log.txt");
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        String oldFile = readFromFile();
+        sb.append(oldFile);
+        sb.append(newText);
+        writeToFile(sb.toString());
+    }
+
+    public static boolean checkIntData(String data)
+    {
+        try
+        {
+            Integer.parseInt(data);
+        } catch (NumberFormatException  ex)
+        {
+            return false;
+        }
+        return true;
     }
 
     public static void printArray(double[][] array)

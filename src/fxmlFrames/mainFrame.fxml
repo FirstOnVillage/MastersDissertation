@@ -20,7 +20,7 @@
                         <MenuItem fx:id="computeMenuItem" disable="true" mnemonicParsing="false" onAction="#computeMenuItemAction" text="Рассчитать концентрацию красителей" />
                         <MenuItem mnemonicParsing="false" onAction="#conformityMenuItemAction" text="Поиск соотвествий среди всех обучающих партий" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Просмотреть log-файл" />
+                        <MenuItem mnemonicParsing="false" onAction="#openLogMenuItemAction" text="Просмотреть log-файл" />
                         <MenuItem mnemonicParsing="false" onAction="#exitMenuItemAction" text="Выход" />
                     </items>
                 </Menu>
